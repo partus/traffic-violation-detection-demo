@@ -7,7 +7,7 @@ import os
 from moviepy.editor import VideoFileClip
 from IPython.display import HTML
 import math
-%matplotlib inline
+#%matplotlib inline
 
 def grayscale(img):
     """Applies the Grayscale transform
@@ -33,6 +33,11 @@ def get_slope(x1,y1,x2,y2):
     return (y2-y1)/(x2-x1)
 
 def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
+    for line in lines:
+        for x1,y1,x2,y2 in line:
+            cv2.line(img, (int(x1), int(y1)), (int(x2),int(y2)), color, thickness)
+    return img
+def draw_inf_lines(img, lines, color=[255, 0, 0], thickness=2):
     for line in lines:
         for x1,y1,x2,y2 in line:
             cv2.line(img, (int(x1), int(y1)), (int(x2),int(y2)), color, thickness)
@@ -189,10 +194,11 @@ for index, source_img in enumerate(sorted(os.listdir("/data/img/taiwan/"))):
     result = weighted_img(lineImg, image)
     h = image.shape[0]
     w = image.shape[1]
-    limage = np.zeros((h*5,w*10,result.shape[2]))
-    limage[h*5:h*6,w*5:w*6,:] =
-    plt.imshow(limage)
-    break
+    limage = np.zeros((h*5,w*5,result.shape[2]))
+    print(h,w,result.shape,limage.shape)
+    limage[ h*2:h*3 ,w*2:w*3,:] = result
+    plt.imshow(result)
+    # break
     line_params = []
     for line in lines:
         line_params.append(slope_intersect(line))
@@ -202,6 +208,12 @@ for index, source_img in enumerate(sorted(os.listdir("/data/img/taiwan/"))):
                           and not np.isinf(b)
                           and np.abs(a) < 10
                           and np.abs(b) < 1000]
+    x=np.linspace(0,1000,2)
+    # for a,b in finite_line_params:
+    #     plt.plot(x,x*a+b)
+    # plt.plot(x,x)
+    plt.show()
+    break
     # print('finite', finite_line_params)
     print(len(finite_line_params))
     pairwise_line_params_of_line_params = []
