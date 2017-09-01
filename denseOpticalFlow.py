@@ -22,10 +22,19 @@ meanmag = np.zeros((hgh,wdth))
 meanmag+=50
 meanang+=1
 mflow = np.zeros((hgh,wdth,2))
+def updateModel(flow):
+    global mflow
+    mask = (flow > 0.1) | (flow < -0.1)
+    np.add(flow*0.003,mflow*0.997,out=mflow,where=mask)
+
+def cutLow(ar, threshold):
+    mask = (ar > threshold) | (ar < -threshold)
+    res=np.zeros(ar.shape)
+    np.add(res,ar,out=res,where=mask)
+    return res
 
 
-
-while(framenum < 3000):
+while(framenum < 80000):
     ret, frame2 = cap.read()
     framenum+=1
     if not framenum%10:
@@ -35,7 +44,8 @@ while(framenum < 3000):
     if ret:
         next = cv2.cvtColor(frame2,cv2.COLOR_BGR2GRAY)
         flow = cv2.calcOpticalFlowFarneback(prvs,next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
-        mflow = flow*0.003+mflow*0.997
+        flow = cutLow(flow,0.1)
+        updateModel(flow)
         flow = mflow
         mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1])
         # it = np.nditer([None,None,mag,ang,meanmag,meanang])
@@ -48,8 +58,12 @@ while(framenum < 3000):
         hsv[...,0] = ang*180/np.pi/2
         hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
         bgr = cv2.cvtColor(hsv,cv2.COLOR_HSV2BGR)
-        # hist = np.histogram(mag)
-        # if not framenum % 100:
+        # hist = np.histogram(mag,100)
+        # if not framenum % 90:
+        #     plt.subplot(2,1,1)
+        #     plt.hist(np.sign(flow.ravel()*-1),100)
+        #     plt.ylim([0,4000])
+        #     plt.subplot(2,1,2)
         #     plt.hist(mag.ravel(),100)
         #     plt.ylim([0,4000])
         plt.show()
