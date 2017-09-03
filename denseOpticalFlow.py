@@ -33,7 +33,11 @@ def cutLow(ar, threshold):
     np.add(res,ar,out=res,where=mask)
     return res
 
-
+def flowToImage(flow):
+    mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1])
+    hsv[...,0] = ang*180/np.pi/2
+    hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
+    return cv2.cvtColor(hsv,cv2.COLOR_HSV2BGR)
 while(framenum < 80000):
     ret, frame2 = cap.read()
     framenum+=1
@@ -46,18 +50,9 @@ while(framenum < 80000):
         flow = cv2.calcOpticalFlowFarneback(prvs,next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
         flow = cutLow(flow,0.1)
         updateModel(flow)
-        flow = mflow
-        mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1])
-        # it = np.nditer([None,None,mag,ang,meanmag,meanang])
-        # for mout, aout,m,a,mm,ma in it:
-        #     mout = mm*0.99+m*0.01
-            # aout = ma*0.99+a*0.01
-        # meanmag = it.operands[0]
-        # meanang = it.operands[1]
-        # print(mag.shape)
-        hsv[...,0] = ang*180/np.pi/2
-        hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
-        bgr = cv2.cvtColor(hsv,cv2.COLOR_HSV2BGR)
+        cv2.imshow('model',flowToImage(mflow))
+        cv2.imshow('flow',flowToImage(flow))
+        
         # hist = np.histogram(mag,100)
         # if not framenum % 90:
         #     plt.subplot(2,1,1)
@@ -68,7 +63,7 @@ while(framenum < 80000):
         #     plt.ylim([0,4000])
         plt.show()
         prvs = next
-        cv2.imshow('frame2',bgr)
+
         # cv2.imshow('frame3',hist)
         cv2.imshow('video',frame2)
     k = cv2.waitKey(1) & 0xff
