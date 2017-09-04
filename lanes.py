@@ -21,14 +21,19 @@ def gaussian_blur(img, kernel_size):
     return cv2.GaussianBlur(img, (kernel_size, kernel_size), 0)
 
 
-def draw_lines(img, lines,extend=0, color=[255, 0, 0], thickness=1):
+def draw_lines(img, lines,extend=0, color=[255, 0, 0], thickness=2,slip=(0,0)):
     for line in lines:
         pair = np.array(line[0])
         a=pair[0:2]
         b=pair[2:4]
+        a[0]+=slip[0]
+        a[1]+=slip[1]
+        b[0]+=slip[0]
+        b[1]+=slip[1]
         vec = a-b;
-        # cv2.line(img, tuple(a), tuple(b), color, thickness)
-        cv2.line(img, tuple(a+vec*extend), tuple(b-vec*extend), color, thickness)
+        if extend:
+            cv2.line(img, tuple(a+vec*extend), tuple(b-vec*extend), [0,255,0], thickness)
+        cv2.line(img, tuple(a), tuple(b), color, thickness)
     return img
 
 
@@ -39,14 +44,14 @@ def zero_img(img):
 def hough_lines(img):
     #
     rho = 4
-    theta = np.pi/180
+    theta = np.pi/180/2
     #threshold is minimum number of intersections in a grid for candidate line to go to output
     threshold = 80
-    max_line_gap = 70
+    max_line_gap = 10
     #my hough values started closer to the values in the quiz, but got bumped up considerably for the challenge video
 
     lines = cv2.HoughLinesP(img, rho, theta, threshold, np.array([]),
-                            minLineLength=70,
+                            minLineLength=160,
                             maxLineGap=44)
     return lines
 
@@ -97,18 +102,19 @@ for index, source_img in enumerate(sorted(os.listdir("/data/img/taiwan/"))):
     cannyImg = canny_image(gaus_gr)
     mpimg.imsave("/data/img/canny/"+source_img,cannyImg)
     lines = hough_lines(cannyImg)
-    lineImg = draw_lines(zero_img(image), lines,extend=0)
-    plt.imshow(zero_img(image))
-    result = weighted_img(lineImg, image)
     h = image.shape[0]
     w = image.shape[1]
-    enl = 2
-    limage = np.zeros((h*(enl*2+1),w*(enl*2+1),result.shape[2]))
-    print(h,w,result.shape,limage.shape)
-    limage[ h*enl:h*(enl+1) ,w*(enl):w*(enl+1),:] = result
+    enl = 1
+    limage = np.zeros((h*(enl*2+1),w*(enl*2+1),image.shape[2]), dtype=np.uint8)
+    limage[ h*enl:h*(enl+1) ,w*(enl):w*(enl+1),:] = image
+    lineImg = draw_lines(limage, lines,extend=40,slip=(w,h))
+    # result = weighted_img(lineImg, image)
+    # print(h,w,result.shape,limage.shape)
+
     # plt.imshow(limage)
-    plt.imshow(result)
-    # break
+    plt.imshow(limage)
+    plt.show()
+    break
     line_params = []
     for line in lines:
         line_params.append(slope_intersect(line))

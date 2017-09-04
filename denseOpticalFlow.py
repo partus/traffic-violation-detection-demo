@@ -51,8 +51,8 @@ while(framenum < 80000):
         flow = cutLow(flow,0.1)
         updateModel(flow)
         cv2.imshow('model',flowToImage(mflow))
-        cv2.imshow('flow',flowToImage(flow))
-        
+        cv2.imshow('flow',flowToImage(cutLow(flow,0.5)))
+
         # hist = np.histogram(mag,100)
         # if not framenum % 90:
         #     plt.subplot(2,1,1)
