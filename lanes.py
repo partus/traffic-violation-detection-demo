@@ -1,6 +1,10 @@
 # importing some useful packages
 import matplotlib.pyplot as plt
+import itertools
 import matplotlib.image as mpimg
+import pandas as pd
+from collections import defaultdict
+from collections import Counter
 import numpy as np
 import cv2
 import os
@@ -94,15 +98,25 @@ def slope_intersect(line):
     return a, b
 
 
+def intersection_point(line1_params, line2_params):
+    a1, b1 = line1_params
+    a2, b2 = line2_params
+
+    # a_1 x + b_1 = a_2 x + b_2
+    x = (b2 - b1) / (a1 - a2)
+    y = a1 * x + b1
+    return x, y
+
+
 for index, source_img in enumerate(sorted(os.listdir("/data/img/taiwan/"))):
     if index < 12:
         continue
     first_frame = 1
     image = mpimg.imread("/data/img/taiwan/" + source_img)
     gaus_gr = gaus_gray(image)
-    mpimg.imsave("/data/img/masked/" + source_img, gaus_gr)
+    # mpimg.imsave("/data/img/masked/" + source_img, gaus_gr)
     cannyImg = canny_image(gaus_gr)
-    mpimg.imsave("/data/img/canny/" + source_img, cannyImg)
+    # mpimg.imsave("/data/img/canny/" + source_img, cannyImg)
     lines = hough_lines(cannyImg)
     h = image.shape[0]
     w = image.shape[1]
@@ -115,9 +129,9 @@ for index, source_img in enumerate(sorted(os.listdir("/data/img/taiwan/"))):
     # print(h,w,result.shape,limage.shape)
 
     # plt.imshow(limage)
-    plt.imshow(limage)
-    plt.show()
-    break
+    plt.imsave('image.png', limage)
+    # plt.show()
+
     line_params = []
     for line in lines:
         line_params.append(slope_intersect(line))
@@ -127,9 +141,50 @@ for index, source_img in enumerate(sorted(os.listdir("/data/img/taiwan/"))):
                           and not np.isinf(b)
                           and np.abs(a) < 10
                           and np.abs(b) < 1000]
+
+    intersection_points = []
+    pairs = defaultdict(list)
+    for (i, line1_params), (j, line2_params) in itertools.combinations(enumerate(finite_line_params), 2):
+        x, y = intersection_point(line1_params, line2_params)
+        if np.isinf(x) or np.isinf(y):
+            continue
+        intersection_points.append([x, y])
+        key = (103 * int(x / 103), 103 * int(y / 103))
+        pairs[key].append((i, j))
+
+    for point, lines in sorted(pairs.items(), key=lambda x: -len(x[1])):
+        if len(lines) > 10:
+            print(point, lines)
+            lines_counter = Counter(x for l in lines for x in l)
+            print('lines_counter', lines_counter)
+            verified_lines = []
+            print(lines_counter.most_common())
+            for line_index, count in lines_counter.most_common():
+                print('line_index', line_index)
+                _add = True
+                for other in verified_lines:
+                    if (line_index, other) not in lines:
+                        _add = False
+                        break
+                if _add:
+                    verified_lines.append(line_index)
+                # print(line_index, _add, verified_lines)
+            if len(verified_lines) > 1:
+                print('verified', verified_lines)
+            print(lines_counter)
+            distinct_lines = set(x for l in lines for x in l)
+            print(distinct_lines)
+            n = len(distinct_lines)
+            print(n * (n + 1) / 2, len(lines))
+   
+    pd.DataFrame(intersection_points).to_csv('points.csv')
+    break
+
     x = np.linspace(0, 1000, 2)
     # for a,b in finite_line_params:
     #     plt.plot(x,x*a+b)
     # plt.plot(x,x)
     plt.show()
     break
+
+
