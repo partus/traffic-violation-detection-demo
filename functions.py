@@ -1,4 +1,6 @@
 import cv2
+import numpy as np
+
 def scaleFrame(frame,factor=0.25):
     height,width, layers = frame.shape
     # print(width, height,layers)
