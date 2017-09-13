@@ -1,5 +1,5 @@
 import cv2
-def scaleFrame(frame,factor=0.25):
+def scaleFrame(frame,factor=0.5):
     height,width, layers = frame.shape
     # print(width, height,layers)
     return cv2.resize(frame, (int(width*factor),int(height*factor)))
