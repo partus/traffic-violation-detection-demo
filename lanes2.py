@@ -207,13 +207,16 @@ def cutSaturated(im, limit):
 def filterContours(contours):
     ret = []
     for cnt in contours:
+        # epsilon = 0.1*cv2.arcLength(cnt,True)
+        # cnt = cv2.approxPolyDP(cnt,epsilon,True)
         area = cv2.contourArea(cnt)
         perimeter = cv2.arcLength(cnt,True)
         if perimeter > 40 and (perimeter*perimeter) > 4*area*7:
             ret.append(cnt)
     return ret
 def filter_mask(fg_mask):
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+    # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1,1))
 
     # Fill any small holes
     closing = cv2.morphologyEx(fg_mask, cv2.MORPH_CLOSE, kernel)
@@ -228,6 +231,7 @@ imdir = "/data/img/taiwan/"
 
 source_img = os.listdir(imdir)[20]
 source_img = imdir+ source_img
+source_img
 source_img = "/data/road.png"
 im= cv2.imread(source_img)
 plt.imshow(im)
@@ -244,6 +248,8 @@ plt.imshow(dilated, cmap="gray")
 ret,thresh1 = cv2.threshold(cut ,127,255,cv2.THRESH_BINARY)
 im2, contours, hierarchy = cv2.findContours(dilated.astype('uint8'),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 t.shape
+np.save('/data/masked.pyn', cut)
+cv2.imwrite('/data/masked.png', cut)
 cut.shape
 plt.imshow(cutSaturated(im,30))
 scut = cutSaturated(im,30)
@@ -269,3 +275,7 @@ def flowToImage(flow):
     return cv2.cvtColor(hsv,cv2.COLOR_HSV2BGR)
 flow = np.load('/data/np/flow_tokyo.npy')
 plt.imshow(flowToImage(flow))
+
+lsd = cv2.imread('/data/lsd/PIL_image-012.jpg')
+lsd = cv2.imread('/data/cv2_masked.jpg')
+plt.imshow(lsd)
