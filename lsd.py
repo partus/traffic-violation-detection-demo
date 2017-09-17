@@ -48,7 +48,13 @@ def draw_lines(img, lines, extend=0, color=[255, 0, 0], thickness=2, slip=(0, 0)
 
 lsd = cv2.createLineSegmentDetector(0)
 def getMainLines(image):
-
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    lsd = cv2.createLineSegmentDetector(0)
+    lines = lsd.detect(gray)[0]
+    canv = np.zeros(image.shape,dtype=np.uint8)
+    draw_lines(canv,lines)
+    hlines = hough_lines(canv[...,0],threshold = 80,minLineLength=70,maxLineGap=1)
+    return hlines
 
 
 
@@ -59,36 +65,7 @@ if __name__ == '__main__':
     # https://stackoverflow.com/questions/41329665/linesegmentdetector-in-opencv-3-with-python
     source_img = os.listdir(imdir)[20]
     source_img = imdir+ source_img
-
     im= cv2.imread(source_img)
+    hlines = getMainLines(im)
+    draw_lines(im, hlines)
     plt.imshow(im)
-    img = cv2.imread('/data/road.png',0)
-
-    #Create default parametrization LSD
-    lsd = cv2.createLineSegmentDetector(0)
-    for line in lines:
-        print(line[0])
-    #Detect lines in the image
-
-    lines = lsd.detect(gray)[0] #Position 0 of the returned tuple are the detected lines
-    lines.shape
-    #Draw detected lines in the image
-    canv = draw_lines(canv,lines)
-    canv =
-
-    #Show image
-    d1=drawn_img
-    canv = np.zeros(drawn_img.shape,dtype=np.uint8)
-    plt.hist(canv.ravel())
-    canv.dtype
-    canv.shape
-    plt.imshow(canv)
-
-    hlines = hough_lines(canv[...,0],threshold = 80,minLineLength=70,maxLineGap=1)
-    hcanvas = np.copy(canv)
-    # hcanvas.fill(0)
-    draw_lines(hcanvas,hlines,color=[0,255,  0],)
-    draw_lines(im,hlines,color=[0,255,  0],)
-    plt.imshow(hcanvas)
-    plt.imshow(drawn_img )
-    cv2.imsave('/data/lsd_tokyo.jpg', )
