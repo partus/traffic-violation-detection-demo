@@ -56,6 +56,22 @@ def getMainLines(image):
     hlines = hough_lines(canv[...,0],threshold = 80,minLineLength=70,maxLineGap=1)
     return hlines
 
+flow = np.load('/data/np/flow_tokyo.npy')
+import numpy.ma as ma
+def classify(flow, lines):
+    shape = flow.shape
+    shape = [shape[0],shape[1]]
+    means = []
+    for line in lines:
+        mask = np.zeros(shape,dtype=np.bool)
+        pair = np.array(line[0])
+        a = pair[0:2]
+        b = pair[2:4]
+        cv2.line(mask, tuple(a), tuple(b), True, 5)
+        maskedarray = ma.array(flow[...,0], mask)
+        means.append(maskedarray.mean())
+    return means
+    return p, front
 
 
 
