@@ -27,6 +27,7 @@ def detsYoloToSortInput(objs):
         res.append([ int(rect[0]-rect[2]/2), int(rect[1]-rect[3]/2), int(rect[0]+rect[2]/2),int(rect[1]+rect[3]/2)])
     return np.array(res)
 colours = np.random.rand(32,3)*255
+
 def drawSortDetections(trackers,frame):
     for d in trackers:
         d = d.astype(np.int32)
