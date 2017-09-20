@@ -107,7 +107,7 @@ class KalmanBoxTracker(object):
     Updates the state vector with observed bbox.
     """
     self.time_since_update = 0
-    self.history = []
+    # self.history = []
     self.hits += 1
     self.hit_streak += 1
     self.kf.update(convert_bbox_to_z(bbox))
@@ -131,6 +131,9 @@ class KalmanBoxTracker(object):
     Returns the current bounding box estimate.
     """
     return convert_x_to_bbox(self.kf.x)
+
+  def getHistory(self):
+      return self.history
 
 def associate_detections_to_trackers(detections,trackers,iou_threshold = 0.3):
   """
@@ -197,6 +200,7 @@ class Sort(object):
     trks = np.zeros((len(self.trackers),5))
     to_del = []
     ret = []
+    hist =[]
     for t,trk in enumerate(trks):
       pos = self.trackers[t].predict()[0]
       trk[:] = [pos[0], pos[1], pos[2], pos[3], 0]
@@ -220,15 +224,24 @@ class Sort(object):
     i = len(self.trackers)
     for trk in reversed(self.trackers):
         d = trk.get_state()[0]
+
         if((trk.time_since_update < self.max_age) and (trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits)):
           ret.append(np.concatenate((d,[trk.id+1])).reshape(1,-1)) # +1 as MOT benchmark requires positive
+          if getHistory:
+              hist.append((trk.getHistory(),trk.id+1))
         i -= 1
         #remove dead tracklet
         if(trk.time_since_update > self.max_age):
           self.trackers.pop(i)
     if(len(ret)>0):
-      return np.concatenate(ret)
-    return np.empty((0,5))
+        if getHistory:
+            return np.concatenate(ret),hist
+        else:
+            return np.concatenate(ret)
+    if getHistory:
+        return np.empty((0,5)),hist
+    else:
+        return np.empty((0,5))
 
 def parse_args():
     """Parse input arguments."""

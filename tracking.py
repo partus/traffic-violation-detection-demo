@@ -10,7 +10,6 @@ def scaleFrame(frame,factor=0.25):
     # print(width, height,layers)
     return cv2.resize(frame, (int(width*factor),int(height*factor)))
 def drawDetection(objs,frame):
-    print(objs)
     if objs:
         for obj in objs:
             rect = obj[2]
@@ -32,8 +31,16 @@ def drawSortDetections(trackers,frame):
     for d in trackers:
         d = d.astype(np.int32)
         cv2.rectangle(frame,(d[0],d[1]),(d[2],d[3]), colours[d[4]%32,:], thickness=1, lineType=8, shift=0)
+def drawSortHistory(history, frame):
+    for h in history:
+        trck = h[0]
+        color = colours[h[1]%32,:]
+        for rect in trck:
+            d = rect[0].astype(np.int32)
+            cv2.rectangle(frame,(d[0],d[1]),(d[2],d[3]), color, thickness=1, lineType=8, shift=0)
+
 cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
-cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
+# cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
 # cap = cv2.VideoCapture("/data/Simran Official Trailer _ Kangana Ranaut _  Hansal Mehta _ T-Series-_LUe4r6eeQA.mkv")
 # cap = cv2.VideoCapture("/data/test1.mkv")
 cap.set(cv2.CAP_PROP_POS_FRAMES, 80000)
@@ -49,14 +56,15 @@ while(1):
     ret, frame = cap.read()
     framenum+=1
     if ret:
-        # frame = scaleFrame(frame)
+        frame = scaleFrame(frame,factor=0.5)
         cv2.imwrite("/tmp/todetect.jpg",frame)
         # if not framenum % 10:
         # if not framenum% 5:
         objs = detect("/tmp/todetect.jpg")
         dets = detsYoloToSortInput(objs)
-        trackers =  motTracker.update(dets)
+        trackers,hist =  motTracker.update(dets,True )
         drawSortDetections(trackers, frame)
+        drawSortHistory(hist, frame)
         # drawDetection(objs, frame)
         # binarymask = fgmask > 10
         # ret,thresh = cv2.threshold(fgmask,127,255,0)
