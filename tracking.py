@@ -38,12 +38,21 @@ def drawSortHistory(history, frame):
         for rect in trck:
             d = rect[0].astype(np.int32)
             cv2.rectangle(frame,(d[0],d[1]),(d[2],d[3]), color, thickness=1, lineType=8, shift=0)
+def historyToPolylines(hist):
+    ret = []
+    for h in hist:
+        trck = h[0]
+        cont = []
+        for rect in trck:
+            cont.append((rect[:,0:2]+rect[:,2:4])/2)
+        ret.append(np.array(cont, dtype=np.int32))
+    return ret
 
 cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
 # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
 # cap = cv2.VideoCapture("/data/Simran Official Trailer _ Kangana Ranaut _  Hansal Mehta _ T-Series-_LUe4r6eeQA.mkv")
-# cap = cv2.VideoCapture("/data/test1.mkv")
-cap.set(cv2.CAP_PROP_POS_FRAMES, 80000)
+# cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/Jackson Hole Wyoming Town Square - SeeJH.com-psfFJR3vZ78.mp4")
+# cap.set(cv2.CAP_PROP_POS_FRAMES, 80000)
 # fgbg = cv2.createBackgroundSubtractorMOG2(history=2000, varThreshold=16,detectShadows=True )
 # fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()
 # fgbg = cv2.bgsegm.createBackgroundSubtractorCNT()
@@ -51,7 +60,7 @@ cap.set(cv2.CAP_PROP_POS_FRAMES, 80000)
 framenum=0
 objs = False
 from sort import Sort
-motTracker = Sort(max_age=10,min_hits=2)
+motTracker = Sort(max_age=30,min_hits=4)
 while(1):
     ret, frame = cap.read()
     framenum+=1
@@ -60,11 +69,25 @@ while(1):
         cv2.imwrite("/tmp/todetect.jpg",frame)
         # if not framenum % 10:
         # if not framenum% 5:
+        # if framenum % 5:
+        #     trackers,hist =  motTracker.update(np.array([]),True )
+        # else:
         objs = detect("/tmp/todetect.jpg")
         dets = detsYoloToSortInput(objs)
-        trackers,hist =  motTracker.update(dets,True )
+        trackers,hist = motTracker.update(dets,True )
         drawSortDetections(trackers, frame)
-        drawSortHistory(hist, frame)
+        # drawSortHistory(hist, frame)
+        pol = historyToPolylines(hist)
+        # print(pol)
+        # hull = []
+        # for cont in pol:
+        #     print("cont")
+        #     print(cont)
+        #     if(len(cont)):
+        #         # hl = cv2.convexHull(cont)
+        #         hl = cv2.approxPolyDP(cont,30,False)
+        #         hull.append(hl)
+        cv2.polylines(frame, pol, False, (0,255,0))
         # drawDetection(objs, frame)
         # binarymask = fgmask > 10
         # ret,thresh = cv2.threshold(fgmask,127,255,0)
