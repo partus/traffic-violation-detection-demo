@@ -51,10 +51,10 @@ def historyToPolylines(hist):
         ret.append(np.array(cont, dtype=np.int32))
     return ret
 
-# cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
+cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
 # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
 # cap = cv2.VideoCapture("/data/Simran Official Trailer _ Kangana Ranaut _  Hansal Mehta _ T-Series-_LUe4r6eeQA.mkv")
-cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/Jackson Hole Wyoming Town Square - SeeJH.com-psfFJR3vZ78.mp4")
+# cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/Jackson Hole Wyoming Town Square - SeeJH.com-psfFJR3vZ78.mp4")
 # cap.set(cv2.CAP_PROP_POS_FRAMES, 80000)
 # fgbg = cv2.createBackgroundSubtractorMOG2(history=2000, varThreshold=16,detectShadows=True )
 # fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()
@@ -71,12 +71,14 @@ async def detectAsync():
     # return objs
 loop = asyncio.get_event_loop()
 
-
+from lsd import getClassified
+from lsd import draw_lines
 
 async def main():
     framenum = 0
     loop = asyncio.get_event_loop()
     future = loop.run_in_executor(None, detect, "/tmp/todetect.jpg")
+    parallel,front = getClassified(cv2.imread("/tmp/todetect.jpg"))
     print(future.done())
     initiated = False
     while True:
@@ -109,7 +111,8 @@ async def main():
                 # drawSortHistory(hist, frame)
                 # pol = historyToPolylines(hist)
                 cv2.polylines(frame, pol, False, (0,255,0))
-
+                draw_lines(frame,parallel, color=(0,0,255))
+                draw_lines(frame,front, color=(0,255,0))
             # print(pol)
             # hull = []
             # for cont in pol:

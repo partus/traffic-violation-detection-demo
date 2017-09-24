@@ -11,9 +11,10 @@ import os
 from moviepy.editor import VideoFileClip
 from IPython.display import HTML
 import math
-%matplotlib inline
-%config InlineBackend.figure_format = "retina"
+# %matplotlib inline
+# %config InlineBackend.figure_format = "retina"
 plt.rcParams['figure.figsize'] = (18, 9)
+import numpy.linalg as linalg
 
 from pylsd import lsd
 
@@ -56,19 +57,59 @@ def getMainLines(image):
     hlines = hough_lines(canv[...,0],threshold = 80,minLineLength=70,maxLineGap=1)
     return hlines
 
-flow = np.load('/data/np/flow_taiwan.npy')
+# flow = np.load('/data/np/flow_taiwan.npy')
 flow = np.load('/data/np/flow_tokyo.npy')
 import numpy.ma as ma
 
-def isFront(flowvec,line):
-    x1,y1,x2,y2=line[0]
-    lvec = np.array([x1-x2,y1-y2])
-    lvecnorm =lvec/np.sqrt(np.sum(lvec*lvec))
-    fvecnorm = flowvec/(np.sqrt(np.sum(flowvec*flowvec)))
-    # return flowvec*normvec
-    ret = np.sqrt(np.square(np.sum(fvecnorm*lvecnorm)))
-    return ret
+def normalize(vec):
+    return vec/linalg.norm(vec)
 
+def orthogonal(vec):
+    return np.array([-vec[1],vec[0]])
+
+def lineVec(line):
+    pair = np.array(line[0])
+    a = pair[0:2]
+    b = pair[2:4]
+    return a-b
+def lineFlow(flow,a,b, width=5):
+    a,b = shorten(a,b)
+    shape = flow.shape
+    shape = [shape[0],shape[1]]
+    mask = np.full(shape,255,dtype=np.uint8)
+    cv2.line(mask, tuple(a.astype(np.int32)), tuple(b.astype(np.int32)), 0, width)
+    return normalize(np.array([ma.array(flow[...,0], mask=mask).mean(),ma.array(flow[...,1], mask=mask).mean()]))
+def shorten(a,b):
+    lvec = (b-a)*0.15
+    return a+lvec,b-lvec
+
+def isFront(flow,a,b,shift=30):
+    lvec = a-b
+    ortcriteria = 0.7
+    lvecnorm =normalize(lvec)
+    lort = orthogonal(lvecnorm)
+    fplus = lineFlow(flow,a+lort*shift,b+lort*shift)
+    fminus = lineFlow(flow,a-lort*shift,b-lort*shift)
+    plus, minus = np.dot(lort,fplus), np.dot(lort,fminus)
+    print( np.sign(plus) == np.sign(minus) , abs(plus)>ortcriteria , abs(minus)>ortcriteria )
+    if (np.sign(plus) == np.sign(minus)) and (abs(plus)>ortcriteria or abs(minus)>ortcriteria):
+
+        return True
+    else:
+        return False
+
+def isParallel(flow,a,b,shift=30 ):
+    lvec = a-b
+    parcriteria = 0.8
+    lvecnorm =normalize(lvec)
+    lort = orthogonal(lvecnorm)
+    fplus = lineFlow(flow,a+lort*shift,b+lort*shift)
+    fminus = lineFlow(flow,a-lort*shift,b-lort*shift)
+    plus, minus = np.dot(lvec,fplus), np.dot(lvec,fminus)
+    if(abs(plus)> parcriteria and abs(minus)>parcriteria):
+        return True
+    else:
+        return False
 def classify(flow, lines):
     shape = flow.shape
     shape = [shape[0],shape[1]]
@@ -81,26 +122,13 @@ def classify(flow, lines):
     for line in lines:
         mask = np.full(shape,255,dtype=np.uint8)
         pair = np.array(line[0])
-        a = pair[0:2]
-        b = pair[2:4]
-        cv2.line(mask, tuple(a), tuple(b), 0, 80)
-        cv2.line(mask, tuple(a), tuple(b), 255, 50)
-        # plt.imshow(mask)
-        # plt.hist(mask.ravel())
-        # mask = mask.astype("bool")
-        flowvec = np.array([ma.array(flow[...,0], mask=mask).mean(),ma.array(flow[...,1], mask=mask).mean()])
-        center = (a+b)/2
-        fline = np.concatenate((center,center+flowvec*100))
-        flowlines.append([fline])
-        isf = isFront(flowvec, line)
-        print(isf)
-        isfs.append(isf)
-        if isf < 0.91:
+        a,b = pair[0:2],pair[2:4]
+        if isFront(flow,a,b):
             # scalar.append(isFront(flowvec, line))
             front.append(line)
-        else:
+        elif isParallel(flow,a,b):
             parallel.append(line)
-    return flowlines
+    # return flowlines
     # return scalar
     # return means
     # return isfs
@@ -114,11 +142,12 @@ def flowToImage(flow):
     hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
     # return hsv
     return cv2.cvtColor(hsv,cv2.COLOR_HSV2RGB)
-plt.imshow(flowToImage(flow))
 
 def dispOpticalFlow( Image,Flow,Divisor=10,scaleArow=5 ):
     "Display image with a visualisation of a flow over the top. A divisor controls the density of the quiver plot."
     PictureShape = np.shape(Image)
+    return np.array([-vec[1],vec[0]])
+
     #determine number of quiver points there will be
     Imax = int(PictureShape[0]/Divisor)
     Jmax = int(PictureShape[1]/Divisor)
@@ -141,28 +170,35 @@ def dispOpticalFlow( Image,Flow,Divisor=10,scaleArow=5 ):
     # cv2.imshow(name,img)
     # return []
 
-
+def getClassified(im):
+    hlines = getMainLines(im)
+    parallel,front = classify(flow,hlines)
+    draw_lines(im,parallel, color=(0,0,255))
+    draw_lines(im,front, color=(0,255,0))
+    return parallel,front
 
 if __name__ == '__main__':
-imdir = "/data/img/taiwan/"
-# https://stackoverflow.com/questions/41329665/linesegmentdetector-in-opencv-3-with-python
-source_img = os.listdir(imdir)[20]
-source_img = imdir+ source_img
-source_img = '/data/road.png'
-source_img = '/data/img/taiwan/image-014.jpg'
+    imdir = "/data/img/taiwan/"
+    # https://stackoverflow.com/questions/41329665/linesegmentdetector-in-opencv-3-with-python
+    source_img = os.listdir(imdir)[20]
+    source_img = imdir+ source_img
+    source_img = '/data/road.png'
+    source_img = '/data/img/taiwan/image-014.jpg'
 
-im= cv2.imread(source_img)
-hlines = getMainLines(im)
-draw_lines(im, hlines)
-plt.imshow(im)
-plt.imshow(im)
-parallel,front = classify(flow,hlines)
-draw_lines(im,parallel, color=(0,0,255))
-draw_lines(im,front, color=(0,255,0))
+    im= cv2.imread(source_img)
+    hlines = getMainLines(im)
+    draw_lines(im, hlines)
+    plt.imshow(im)
+    plt.imshow(im)
 
-flowlines = classify(flow,hlines)
-flowlines
-plt.hist(classify(flow,hlines),100)
-draw_lines(im,flowlines, color=(0,255,255))
-plt.imshow(dispOpticalFlow(im,flow))
-plt.imshow(dispOpticalFlow(im,flow,scaleArow=25,Divisor=30))
+
+    parallel,front = classify(flow,hlines)
+    draw_lines(im,parallel, color=(0,0,255))
+    draw_lines(im,front, color=(0,255,0))
+    plt.imshow(im)
+    flowlines = classify(flow,hlines)
+    flowlines
+    plt.hist(classify(flow,hlines),100)
+    draw_lines(im,flowlines, color=(0,255,255))
+    plt.imshow(dispOpticalFlow(im,flow))
+    plt.imshow(dispOpticalFlow(im,flow,scaleArow=25,Divisor=30))
