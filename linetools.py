@@ -4,6 +4,7 @@
 #
 from numpy import *
 from numpy import linalg
+import numpy as np
 
 def perp( a ) :
     b = empty_like(a)
@@ -46,12 +47,18 @@ def areClose(a1,a2,b1,b2):
 
 
 def joinClose(lines):
-        for line in lines:
-            pair = np.array(line[0]).astype('uint32')
-            a = pair[0:2]
-            b = pair[2:4]
-            a[0] += slip[0]
-            a[1] += slip[1]
-            b[0] += slip[0]
-            b[1] += slip[1]
-            vec = a - b
+    graph = np.zeros((lines.shape[0],lines.shape[0]))
+    for line in lines:
+        pair = np.array(line[0]).astype('uint32')
+        a = pair[0:2]
+        b = pair[2:4]
+        a[0] += slip[0]
+        a[1] += slip[1]
+        b[0] += slip[0]
+        b[1] += slip[1]
+        vec = a - b
+
+lines = hlines
+
+np.fromfunction((lines.shape[0],lines.shape[0]))
+hlines.shape
