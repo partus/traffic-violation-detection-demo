@@ -11,7 +11,8 @@ import os
 from moviepy.editor import VideoFileClip
 from IPython.display import HTML
 import math
-# %matplotlib inline
+from linetools import joinClose as joinCloseLines
+%matplotlib inline
 # %config InlineBackend.figure_format = "retina"
 plt.rcParams['figure.figsize'] = (18, 9)
 import numpy.linalg as linalg
@@ -55,7 +56,9 @@ def getMainLines(image):
     canv = np.zeros(image.shape,dtype=np.uint8)
     draw_lines(canv,lines,thickness=2)
     hlines = hough_lines(canv[...,0],threshold = 80,minLineLength=70,maxLineGap=1)
-    return hlines
+
+    # return hlines
+    return joinCloseLines(hlines)
 
 # flow = np.load('/data/np/flow_taiwan.npy')
 flow = np.load('/data/np/flow_tokyo.npy')
@@ -183,15 +186,21 @@ if __name__ == '__main__':
     source_img = os.listdir(imdir)[20]
     source_img = imdir+ source_img
     source_img = '/data/road.png'
-    source_img = '/data/img/taiwan/image-014.jpg'
+    # source_img = '/data/img/taiwan/image-014.jpg'
 
     im= cv2.imread(source_img)
     hlines = getMainLines(im)
+    hlines.shape
+    draw_lines(im, hlines,thickness=3)
     draw_lines(im, hlines)
     plt.imshow(im)
     plt.imshow(im)
-
-
+    glines = joinClose(hlines)
+    glines.shape
+    draw_lines(im,glines, color=(255,255,0),thickness=2)
+    glines
+    np.save('/data/np/hlines_tokyo.npy', hlines)
+    hlines
     parallel,front = classify(flow,hlines)
     draw_lines(im,parallel, color=(0,0,255))
     draw_lines(im,front, color=(0,255,0))
