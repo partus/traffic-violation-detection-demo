@@ -32,7 +32,15 @@ def smallAngled(a,b):
     crit = 1- math.cos(0.04)
     return abs(np.dot(a,b)/ linalg.norm(a)/linalg.norm(b)) > crit
 
-def areClose(a1,a2,b1,b2):
+def lineToVec(l):
+    pair = np.array(line[0])
+    a = pair[0:2]
+    b = pair[2:4]
+    return a,b
+
+def areClose(l1,l2):
+    a1,a2 = lineToVec(l1)
+    b1,b2 = lineToVec(l2)
     ad =  a2-a1
     bd =  b2-b1
     a,b = linalg.norm(ad),linalg.norm(bd)
@@ -49,6 +57,12 @@ def areClose(a1,a2,b1,b2):
 def joinClose(lines):
     graph = np.zeros((lines.shape[0],lines.shape[0]))
     for line in lines:
+    gr = []
+    num = 0
+    for line in lines:
+        matches = [el for el in gr if areClose(el[0],line)]
+        if()
+
         pair = np.array(line[0]).astype('uint32')
         a = pair[0:2]
         b = pair[2:4]
