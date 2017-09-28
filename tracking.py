@@ -51,6 +51,16 @@ def historyToPolylines(hist):
         ret.append(np.array(cont, dtype=np.int32))
     return ret
 
+def historyToTracks(hist):
+    ret = []
+    for h in hist:
+        trck = h[0]
+        cont = []
+        for rect in trck:
+            cont.append((rect[:,0:2]+rect[:,2:4])/2)
+        ret.append((np.array(cont, dtype=np.int32),h[0]))
+    return ret
+
 cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
 # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
 # cap = cv2.VideoCapture("/data/Simran Official Trailer _ Kangana Ranaut _  Hansal Mehta _ T-Series-_LUe4r6eeQA.mkv")
@@ -96,7 +106,7 @@ async def main():
                 objs = future.result()
                 dets = detsYoloToSortInput(objs)
                 trackers,hist = motTracker.update(dets,True )
-                pol = historyToPolylines(hist)
+                tracks = historyToTracks(hist)
                 # print(future.result())
 
                 future.cancel()
@@ -110,7 +120,9 @@ async def main():
                 drawSortDetections(trackers, frame)
                 # drawSortHistory(hist, frame)
                 # pol = historyToPolylines(hist)
-                cv2.polylines(frame, pol, False, (0,255,0))
+                for trk in tracks:
+                    cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:])
+                # cv2.polylines(frame, pol, False, (0,255,0))
                 draw_lines(frame,parallel, color=(0,0,255))
                 draw_lines(frame,front, color=(0,255,0))
             # print(pol)
