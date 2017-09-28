@@ -1,23 +1,15 @@
-#
-# line segment intersection using vectors
-# see Computer Graphics by F.S. Hill
-#
 from numpy import *
 from numpy import linalg
 import numpy as np
 from scipy.sparse.csgraph import connected_components
 import itertools
+
 def perp( a ) :
     b = empty_like(a)
     b[0] = -a[1]
     b[1] = a[0]
     return b
 
-import matplotlib.pyplot as plt
-%matplotlib inline
-# line segment a given by endpoints a1, a2
-# line segment b given by endpoints b1, b2
-# return
 def seg_intersect(a1,a2, b1,b2) :
     da = a2-a1
     db = b2-b1
@@ -55,6 +47,7 @@ def areClose(l1,l2):
         return True
     else:
         return False
+
 def joinTwoLines(l1,l2):
     maxnorm = 0
     pair = ()
