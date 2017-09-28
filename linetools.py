@@ -5,13 +5,16 @@
 from numpy import *
 from numpy import linalg
 import numpy as np
-
+from scipy.sparse.csgraph import connected_components
+import itertools
 def perp( a ) :
     b = empty_like(a)
     b[0] = -a[1]
     b[1] = a[0]
     return b
 
+import matplotlib.pyplot as plt
+%matplotlib inline
 # line segment a given by endpoints a1, a2
 # line segment b given by endpoints b1, b2
 # return
@@ -33,7 +36,7 @@ def smallAngled(a,b):
     return abs(np.dot(a,b)/ linalg.norm(a)/linalg.norm(b)) > crit
 
 def lineToVec(l):
-    pair = np.array(line[0])
+    pair = np.array(l[0])
     a = pair[0:2]
     b = pair[2:4]
     return a,b
@@ -44,9 +47,9 @@ def areClose(l1,l2):
     ad =  a2-a1
     bd =  b2-b1
     a,b = linalg.norm(ad),linalg.norm(bd)
-    con = (a1+a2) -(b1+b2)
+    con = ((a1+a2) -(b1+b2))/2
     connorm = linalg.norm(con)
-    if(2*1.1* connorm > a+b):
+    if(1.1* connorm > (a+b)/2):
         return False
     if(smallAngled(ad,bd) and smallAngled(ad,con) ):
         return True
@@ -61,8 +64,6 @@ def joinClose(lines):
     num = 0
     for line in lines:
         matches = [el for el in gr if areClose(el[0],line)]
-        if()
-
         pair = np.array(line[0]).astype('uint32')
         a = pair[0:2]
         b = pair[2:4]
@@ -72,7 +73,18 @@ def joinClose(lines):
         b[1] += slip[1]
         vec = a - b
 
+lines[1,...]
 lines = hlines
-
-np.fromfunction((lines.shape[0],lines.shape[0]))
+lines.shape
+def asdf(x,y):
+    print(x,y)
+    return x,y
+    return areClose(lines[x,...],lines[y,...])
+graph = np.zeros((lines.shape[0],lines.shape[0]), dtype=np.bool)
+np.fromfunction(asdf, (lines.shape[0],lines.shape[0]))
 hlines.shape
+it = itertools.permutations(itertools.islice(itertools.count(),lines.shape[0]),2)
+for x,y in it:
+    graph[x,y] = areClose(lines[x,...],lines[y,...])
+plt.hist(graph.ravel())
+connected_components(graph, directed=False)
