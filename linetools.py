@@ -9,7 +9,8 @@ def perp( a ) :
     b[0] = -a[1]
     b[1] = a[0]
     return b
-
+def normalize(a):
+    return a/linalg.norm(a)
 def seg_intersect(a1,a2, b1,b2) :
     da = a2-a1
     db = b2-b1
@@ -24,11 +25,12 @@ def seg_intersect(a1,a2, b1,b2) :
         return coef*db + b1
 
 def smallAngled(a,b):
-    crit = 1- math.cos(0.04)
+    # return False
+    crit = math.cos(0.05)
     return abs(np.dot(a,b)/ linalg.norm(a)/linalg.norm(b)) > crit
 
 def lineToVec(l):
-    pair = np.array(l[0])
+    pair = l[0,...]
     a = pair[0:2]
     b = pair[2:4]
     return a,b
@@ -43,7 +45,7 @@ def areClose(l1,l2):
     connorm = linalg.norm(con)
     if(connorm > 1.2*(a+b)/2):
         return False
-    if(smallAngled(ad,bd) and smallAngled(ad,con) ):
+    if(smallAngled(ad,bd) and (abs(np.dot(normalize(perp(ad)),con)) < 5)):
         return True
     else:
         return False
@@ -66,16 +68,20 @@ def joinClose(lines):
     for x,y in it:
         graph[x,y] = areClose(lines[x,...],lines[y,...])
     labelcount, labels = connected_components(graph, directed=False)
-    print(labels)
     lres = np.zeros((labelcount,1,4))
+    glines =[]
     for label in range(labelcount):
+        tp = [labels[i] for i in range(len(labels)) if labels[i] == label ]
         lns = [lines[i] for i in range(len(labels)) if labels[i] == label ]
         line = lns[0]
         for ln in lns:
             line = joinTwoLines(line,ln)
+        glines.append(np.array(lns))
         lres[label,...] = line
+    # return glines
     return lres
 
 
 # hlines
-# joinClose(hlines)
+# areClose(np.array([[0,0,100,0]]),np.array([[0,0,60,80]]))
+joinClose(hlines)
