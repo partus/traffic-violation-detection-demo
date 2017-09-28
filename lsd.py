@@ -12,9 +12,9 @@ from moviepy.editor import VideoFileClip
 from IPython.display import HTML
 import math
 from linetools import joinClose as joinCloseLines
-%matplotlib inline
+# %matplotlib inline
 # %config InlineBackend.figure_format = "retina"
-plt.rcParams['figure.figsize'] = (18, 9)
+# plt.rcParams['figure.figsize'] = (18, 9)
 import numpy.linalg as linalg
 
 from pylsd import lsd

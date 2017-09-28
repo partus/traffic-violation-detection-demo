@@ -84,6 +84,9 @@ loop = asyncio.get_event_loop()
 from lsd import getClassified
 from lsd import draw_lines
 
+ret, frame = cap.read()
+cv2.imwrite("/tmp/todetect.jpg",frame)
+
 async def main():
     framenum = 0
     loop = asyncio.get_event_loop()

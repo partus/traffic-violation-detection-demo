@@ -25,7 +25,15 @@ meanang+=1
 mflow = np.zeros((hgh,wdth,2))
 def updateModel(flow):
     global mflow
-    mask = (flow > 1) | (flow < -1)
+    mask = flow*flow
+    mask = np.sum(mask,axis=2)
+    # mask = (flow > 1) | (flow < -1)
+    shape = list(mask.shape)
+    shape.append(1)
+    mask.shape = tuple(shape)
+    # mask.reshape(shape)
+    # print(mask.shape,shape)
+    mask = mask > 1
     np.add(flow*0.003,mflow*0.997,out=mflow,where=mask)
 
 def cutLow(ar, threshold):
@@ -39,7 +47,7 @@ def flowToImage(flow):
     hsv[...,0] = ang*180/np.pi/2
     hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
     return cv2.cvtColor(hsv,cv2.COLOR_HSV2BGR)
-while(framenum < 3000):
+while(framenum < 4000):
     ret, frame2 = cap.read()
     framenum+=1
     if not framenum%10:
@@ -77,5 +85,6 @@ while(framenum < 3000):
         cv2.imwrite('opticalfb.png',frame2)
         cv2.imwrite('opticalhsv.png',bgr)
 np.save('/data/np/flow_taiwan.npy', mflow)
+# np.save('/data/np/flow_tokyo.npy', mflow)
 cap.release()
 cv2.destroyAllWindows()
