@@ -49,42 +49,40 @@ def areClose(l1,l2):
     a,b = linalg.norm(ad),linalg.norm(bd)
     con = ((a1+a2) -(b1+b2))/2
     connorm = linalg.norm(con)
-    if(1.1* connorm > (a+b)/2):
+    if(connorm > 1.2*(a+b)/2):
         return False
     if(smallAngled(ad,bd) and smallAngled(ad,con) ):
         return True
     else:
         return False
-
+def joinTwoLines(l1,l2):
+    maxnorm = 0
+    pair = ()
+    for i in (0,2):
+        for j in (0,2):
+            p1,p2 = l1[0,i:i+2], l2[0,j:j+2]
+            norm = linalg.norm(p1-p2)
+            if norm  > maxnorm:
+                pair = (p1,p2)
+                maxnorm = norm
+    return np.array(pair).reshape((1,4))
 
 def joinClose(lines):
     graph = np.zeros((lines.shape[0],lines.shape[0]))
-    for line in lines:
-    gr = []
-    num = 0
-    for line in lines:
-        matches = [el for el in gr if areClose(el[0],line)]
-        pair = np.array(line[0]).astype('uint32')
-        a = pair[0:2]
-        b = pair[2:4]
-        a[0] += slip[0]
-        a[1] += slip[1]
-        b[0] += slip[0]
-        b[1] += slip[1]
-        vec = a - b
+    it = itertools.permutations(itertools.islice(itertools.count(),lines.shape[0]),2)
+    for x,y in it:
+        graph[x,y] = areClose(lines[x,...],lines[y,...])
+    labelcount, labels = connected_components(graph, directed=False)
+    print(labels)
+    lres = np.zeros((labelcount,1,4))
+    for label in range(labelcount):
+        lns = [lines[i] for i in range(len(labels)) if labels[i] == label ]
+        line = lns[0]
+        for ln in lns:
+            line = joinTwoLines(line,ln)
+        lres[label,...] = line
+    return lres
 
-lines[1,...]
-lines = hlines
-lines.shape
-def asdf(x,y):
-    print(x,y)
-    return x,y
-    return areClose(lines[x,...],lines[y,...])
-graph = np.zeros((lines.shape[0],lines.shape[0]), dtype=np.bool)
-np.fromfunction(asdf, (lines.shape[0],lines.shape[0]))
-hlines.shape
-it = itertools.permutations(itertools.islice(itertools.count(),lines.shape[0]),2)
-for x,y in it:
-    graph[x,y] = areClose(lines[x,...],lines[y,...])
-plt.hist(graph.ravel())
-connected_components(graph, directed=False)
+
+# hlines
+# joinClose(hlines)
