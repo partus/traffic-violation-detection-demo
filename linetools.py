@@ -24,6 +24,15 @@ def seg_intersect(a1,a2, b1,b2) :
     else:
         return coef*db + b1
 
+def seg_poliline_intersect(seg,pol):
+    res = False
+    for l1,l2 in itertools.izip(pol,pol[1:]):
+        if not seg_intersect(l1[0:2],l1[2:4],l2[0:2],l2[2:4]) is None:
+            res=True
+            break
+    return res
+
+
 def smallAngled(a,b):
     # return False
     crit = math.cos(0.05)
@@ -84,4 +93,4 @@ def joinClose(lines):
 
 # hlines
 # areClose(np.array([[0,0,100,0]]),np.array([[0,0,60,80]]))
-joinClose(hlines)
+# joinClose(hlines)
