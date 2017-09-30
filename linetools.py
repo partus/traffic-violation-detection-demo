@@ -3,6 +3,7 @@ from numpy import linalg
 import numpy as np
 from scipy.sparse.csgraph import connected_components
 import itertools
+import cv2
 
 def perp( a ) :
     b = empty_like(a)

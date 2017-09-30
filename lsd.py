@@ -37,14 +37,17 @@ def getMainLines(image):
     # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     gray = image
     # cv2.imshow("gray",gray)
-    cv2.waitKey(3000)
+
     dets  = lsd.detect(gray)
+    print("segments")
     print(dets)
     lines = dets[0]
 
     canv = np.zeros(image.shape,dtype=np.uint8)
     draw_lines(canv,lines,thickness=2,color=255)
-    hlines = hough_lines(canv[...,0],threshold = 80,minLineLength=70,maxLineGap=1)
+    cv2.imshow("canv",canv)
+    cv2.waitKey(3000)
+    hlines = hough_lines(canv,threshold = 80,minLineLength=70,maxLineGap=1)
 
     # return hlines
     return joinCloseLines(hlines)
@@ -153,8 +156,7 @@ def dispOpticalFlow( Image,Flow,Divisor=10,scaleArow=5 ):
          Y1 = (j)*Divisor
          X2 = int(X1 + Flow[X1,Y1,1]*scaleArow)
          Y2 = int(Y1 + Flow[X1,Y1,0]*scaleArow)
-        #  X2 = np.clip(X2, 0, PictureShape[0])
-        #  Y2 = np.clip(Y2, 0, PictureShape[1])
+         Y2 = np.clip(Y2, 0, PictureShape[1])
          #add all the lines to the mask
          mask = cv2.line(mask, (Y1,X1),(Y2,X2), [0, 255, 0], 1)
     #superpose lines onto image
@@ -165,6 +167,7 @@ def dispOpticalFlow( Image,Flow,Divisor=10,scaleArow=5 ):
     # return []
 
 def getClassified(im,flow):
+    cv2.imshow('gh',im)
     hlines = getMainLines(im)
     parallel,front = classify(flow,hlines)
     # draw_lines(im,parallel, color=(0,0,255))

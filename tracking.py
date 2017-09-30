@@ -63,7 +63,7 @@ def historyToTracks(hist):
         cont = []
         for rect in trck:
             cont.append((rect[:,0:2]+rect[:,2:4])/2)
-        ret.append((np.array(cont, dtype=np.int32),h[0]))
+        ret.append((np.array(cont, dtype=np.int32),h[1]))
     return ret
 
 
@@ -91,6 +91,13 @@ async def main():
     detectFuture = loop.run_in_executor(None, detect, "/tmp/todetect.jpg")
     flow = FlowModel(f0)
     bgExtractor = BackgroundExtractor()
+    for i in range(100):
+        print(i)
+        r0,f0 = cap.read()
+        f0 = scaleFrame(f0,factor=0.5)
+        cv2.imshow("fg",bgExtractor.apply(f0))
+        cv2.imshow("bg", bgExtractor.getBackground())
+        cv2.waitKey(20)
     # print(detectFuture.done())
     initiated = False
     while True:
@@ -99,11 +106,11 @@ async def main():
         framenum+=1
         if ret:
             frame = scaleFrame(frame,factor=0.5)
-            bgExtractor.apply(frame)
-            background = bgExtractor.getBackground()
-            fmodel = flow.apply(frame)
-            parallel,front = getClassified(background,fmodel)
-            # print(detectFuture.done(),detectFuture.cancelled())
+            # bgExtractor.apply(frame)
+            # background = bgExtractor.getBackground()
+            # fmodel = flow.apply(frame)
+            # parallel,front = getClassified(background,fmodel)
+
             cv2.imwrite("/tmp/todetect.jpg",frame)
 
             if(detectFuture.done()):
@@ -121,10 +128,11 @@ async def main():
                 # drawSortHistory(hist, frame)
                 # pol = historyToPolylines(hist)
                 for trk in tracks:
+                    print(trk)
                     cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:])
                 # cv2.polylines(frame, pol, False, (0,255,0))
-                draw_lines(frame,parallel, color=(0,0,255))
-                draw_lines(frame,front, color=(0,255,0))
+                # draw_lines(frame,parallel, color=(0,0,255))
+                # draw_lines(frame,front, color=(0,255,0))
 
             print(framenum)
             cv2.imshow('frame',frame)
