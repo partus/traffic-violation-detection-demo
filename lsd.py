@@ -11,7 +11,7 @@ import os
 from moviepy.editor import VideoFileClip
 from IPython.display import HTML
 import math
-from linetools import joinClose as joinCloseLines
+from linetools import joinClose as joinCloseLines, draw_lines
 # %matplotlib inline
 # %config InlineBackend.figure_format = "retina"
 # plt.rcParams['figure.figsize'] = (18, 9)
@@ -32,36 +32,20 @@ def hough_lines(img,threshold = 80,minLineLength=80,maxLineGap=1):
                             maxLineGap)
     return lines
 
-def draw_lines(img, lines, extend=0, color=[255, 0, 0], thickness=1, slip=(0, 0)):
-    for line in lines:
-        pair = np.array(line[0]).astype('uint32')
-        a = pair[0:2]
-        b = pair[2:4]
-        a[0] += slip[0]
-        a[1] += slip[1]
-        b[0] += slip[0]
-        b[1] += slip[1]
-        vec = a - b
-        if extend:
-            cv2.line(img, tuple(a + vec * extend),
-                     tuple(b - vec * extend), [0, 255, 0], thickness)
-        cv2.line(img, tuple(a), tuple(b), color, thickness)
-    # return img
-
 lsd = cv2.createLineSegmentDetector(0)
 def getMainLines(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = image
     lsd = cv2.createLineSegmentDetector(0)
     lines = lsd.detect(gray)[0]
     canv = np.zeros(image.shape,dtype=np.uint8)
-    draw_lines(canv,lines,thickness=2)
+    draw_lines(canv,lines,thickness=2,color=255)
     hlines = hough_lines(canv[...,0],threshold = 80,minLineLength=70,maxLineGap=1)
 
     # return hlines
     return joinCloseLines(hlines)
 
-# flow = np.load('/data/np/flow_taiwan.npy')
-flow = np.load('/data/np/flow_tokyo.npy')
+
 import numpy.ma as ma
 
 def normalize(vec):
@@ -75,6 +59,7 @@ def lineVec(line):
     a = pair[0:2]
     b = pair[2:4]
     return a-b
+
 def lineFlow(flow,a,b, width=5):
     a,b = shorten(a,b)
     shape = flow.shape
@@ -82,6 +67,7 @@ def lineFlow(flow,a,b, width=5):
     mask = np.full(shape,255,dtype=np.uint8)
     cv2.line(mask, tuple(a.astype(np.int32)), tuple(b.astype(np.int32)), 0, width)
     return normalize(np.array([ma.array(flow[...,0], mask=mask).mean(),ma.array(flow[...,1], mask=mask).mean()]))
+
 def shorten(a,b):
     lvec = (b-a)*0.15
     return a+lvec,b-lvec
@@ -113,6 +99,7 @@ def isParallel(flow,a,b,shift=30 ):
         return True
     else:
         return False
+
 def classify(flow, lines):
     shape = flow.shape
     shape = [shape[0],shape[1]]
@@ -173,11 +160,11 @@ def dispOpticalFlow( Image,Flow,Divisor=10,scaleArow=5 ):
     # cv2.imshow(name,img)
     # return []
 
-def getClassified(im):
+def getClassified(im,flow):
     hlines = getMainLines(im)
     parallel,front = classify(flow,hlines)
-    draw_lines(im,parallel, color=(0,0,255))
-    draw_lines(im,front, color=(0,255,0))
+    # draw_lines(im,parallel, color=(0,0,255))
+    # draw_lines(im,front, color=(0,255,0))
     return parallel,front
 
 if __name__ == '__main__':
@@ -187,7 +174,8 @@ if __name__ == '__main__':
     source_img = imdir+ source_img
     source_img = '/data/road.png'
     # source_img = '/data/img/taiwan/image-014.jpg'
-
+    # flow = np.load('/data/np/flow_taiwan.npy')
+    flow = np.load('/data/np/flow_tokyo.npy')
     im= cv2.imread(source_img)
     hlines = getMainLines(im)
     hlines.shape
