@@ -25,6 +25,9 @@ def cutLow(ar, threshold):
 
 def flowToImage(flow):
     mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1])
+    shape = list(flow.shape)
+    shape[2] = 3
+    hsv = np.zeros(shape, dtype=np.uint8)
     hsv[...,0] = ang*180/np.pi/2
     hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
     return cv2.cvtColor(hsv,cv2.COLOR_HSV2BGR)
@@ -66,8 +69,6 @@ if __name__ == '__main__':
     model = FlowModel(frame1)
     # frame1 = scaleFrame(frame1)
     prvs = cv2.cvtColor(frame1,cv2.COLOR_BGR2GRAY)
-    hsv = np.zeros_like(frame1)
-    hsv[...,1] = 255
     framenum = 0
 
     while(framenum < 4000):
@@ -78,11 +79,10 @@ if __name__ == '__main__':
 
         # frame2 = scaleFrame(frame2)
         if ret:
-            cv2.imshow('model',model.getModel())
-            # cv2.imshow('flow',flowToImage(cutLow(flow,0.5)))
-
-            # hist = np.histogram(mag,100)
-
+            if (framenum %100) <50:
+                model.apply(frame2)
+            # cv2.imshow('model',model.getModel())
+            cv2.imshow('flow',flowToImage(cutLow(model.getModel(),0.5)))
             # cv2.imshow('frame3',hist)
             cv2.imshow('video',frame2)
         k = cv2.waitKey(10) & 0xff

@@ -81,6 +81,7 @@ async def detectAsync():
 loop = asyncio.get_event_loop()
 
 
+
 async def main():
     cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
     r0,f0 = cap.read()
@@ -141,11 +142,7 @@ async def main():
         k = cv2.waitKey(30) & 0xff
 
 loop.run_until_complete(main())
-# loop.run_in_executor(None, detectAsync)
-# asyncio.ensure_detectFuture(main())
-#
-# asyncio.ensure_detectFuture(main())
-# loop.run_forever()
+
 print("complete")
 cap.release()
 cv2.destroyAllWindows()
