@@ -39,8 +39,6 @@ def getMainLines(image):
     # cv2.imshow("gray",gray)
 
     dets  = lsd.detect(gray)
-    print("segments")
-    print(dets)
     lines = dets[0]
 
     canv = np.zeros(image.shape,dtype=np.uint8)
@@ -87,9 +85,7 @@ def isFront(flow,a,b,shift=30):
     fplus = lineFlow(flow,a+lort*shift,b+lort*shift)
     fminus = lineFlow(flow,a-lort*shift,b-lort*shift)
     plus, minus = np.dot(lort,fplus), np.dot(lort,fminus)
-    print( np.sign(plus) == np.sign(minus) , abs(plus)>ortcriteria , abs(minus)>ortcriteria )
     if (np.sign(plus) == np.sign(minus)) and (abs(plus)>ortcriteria or abs(minus)>ortcriteria):
-
         return True
     else:
         return False
@@ -162,7 +158,6 @@ def dispOpticalFlow( Image,Flow,Divisor=10,scaleArow=5 ):
     #superpose lines onto image
     img = cv2.add(Image,mask)
     return img
-    #print image
     # cv2.imshow(name,img)
     # return []
 

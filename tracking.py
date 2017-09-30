@@ -80,6 +80,16 @@ async def detectAsync():
     # return objs
 loop = asyncio.get_event_loop()
 
+# async def futurise():
+
+class Executor:
+    def __init__(self,func,*args):
+        self.func = func
+        loop = asyncio.get_event_loop()
+        self.future = loop.run_in_executor(None, detect, *args)
+    def res(self):
+        if self.future.done():
+            True
 
 
 async def main():
@@ -92,6 +102,7 @@ async def main():
     detectFuture = loop.run_in_executor(None, detect, "/tmp/todetect.jpg")
     flow = FlowModel(f0)
     bgExtractor = BackgroundExtractor()
+
     for i in range(100):
         print(i)
         r0,f0 = cap.read()
@@ -99,6 +110,7 @@ async def main():
         cv2.imshow("fg",bgExtractor.apply(f0))
         cv2.imshow("bg", bgExtractor.getBackground())
         cv2.waitKey(20)
+    bgFuture = loop.run_in_executor(None, bgExtractor.apply, f0)
     # print(detectFuture.done())
     initiated = False
     while True:
@@ -113,6 +125,12 @@ async def main():
             # parallel,front = getClassified(background,fmodel)
 
             cv2.imwrite("/tmp/todetect.jpg",frame)
+
+            if(bgFuture.done()):
+
+                bgFuture.cancel()
+                cv2.imshow("bg", bgExtractor.getBackground())
+                bgFuture = loop.run_in_executor(None, bgExtractor.apply, frame)
 
             if(detectFuture.done()):
                 initiated = True
@@ -129,7 +147,7 @@ async def main():
                 # drawSortHistory(hist, frame)
                 # pol = historyToPolylines(hist)
                 for trk in tracks:
-                    print(trk)
+                    # print(trk)
                     cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:])
                 # cv2.polylines(frame, pol, False, (0,255,0))
                 # draw_lines(frame,parallel, color=(0,0,255))

@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
         # frame2 = scaleFrame(frame2)
         if ret:
-            if (framenum %100) <50:
+            if (framenum % 100) <50:
                 model.apply(frame2)
             # cv2.imshow('model',model.getModel())
             cv2.imshow('flow',flowToImage(model.getModel()))
