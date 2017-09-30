@@ -32,10 +32,12 @@ class FlowModel:
     def __init__(self,frame):
         hgh,wdth,chn = frame.shape
         self.mflow = np.zeros((hgh,wdth,2))
+        self.prvs = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
     def applyFlow(self, next):
         prvs = self.prvs
+        print("fshape", prvs.shape, next.shape)
         return cv2.calcOpticalFlowFarneback(prvs,next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
-    def updateModel(self,frame):
+    def apply(self,frame):
         next = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
         flow = self.applyFlow(next)
         flow = cutLow(flow,0.1)

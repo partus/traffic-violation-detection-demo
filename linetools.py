@@ -90,21 +90,22 @@ def joinClose(lines):
     # return glines
     return lres
 
-def draw_lines(img, lines, extend=0, color=[255, 0, 0],extendColor=[0, 255, 0] thickness=1, slip=(0, 0)):
-    for line in lines:
-        pair = np.array(line[0]).astype('uint32')
-        a = pair[0:2]
-        b = pair[2:4]
-        a[0] += slip[0]
-        a[1] += slip[1]
-        b[0] += slip[0]
-        b[1] += slip[1]
-        vec = a - b
-        if extend:
-            cv2.line(img, tuple(a + vec * extend),
-                     tuple(b - vec * extend),extendColor , thickness)
-        cv2.line(img, tuple(a), tuple(b), color, thickness)
-    # return img
+def draw_lines(img, lines, extend=0, color=[255, 0, 0],extendColor=[0, 255, 0], thickness=1, slip=(0, 0)):
+    if not lines is None:
+        for line in lines:
+            pair = np.array(line[0]).astype('uint32')
+            a = pair[0:2]
+            b = pair[2:4]
+            a[0] += slip[0]
+            a[1] += slip[1]
+            b[0] += slip[0]
+            b[1] += slip[1]
+            vec = a - b
+            if extend:
+                cv2.line(img, tuple(a + vec * extend),
+                         tuple(b - vec * extend),extendColor , thickness)
+            cv2.line(img, tuple(a), tuple(b), color, thickness)
+        # return img
 
 
 

@@ -36,8 +36,12 @@ lsd = cv2.createLineSegmentDetector(0)
 def getMainLines(image):
     # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     gray = image
-    lsd = cv2.createLineSegmentDetector(0)
-    lines = lsd.detect(gray)[0]
+    # cv2.imshow("gray",gray)
+    cv2.waitKey(3000)
+    dets  = lsd.detect(gray)
+    print(dets)
+    lines = dets[0]
+
     canv = np.zeros(image.shape,dtype=np.uint8)
     draw_lines(canv,lines,thickness=2,color=255)
     hlines = hough_lines(canv[...,0],threshold = 80,minLineLength=70,maxLineGap=1)

@@ -1,17 +1,19 @@
 from darknet import Detector
-detect = Detector(thresh=0.4,cfg="/data/weights/cfg/yolo.cfg",weights="/data/weights/yolo.weights",metafile="/data/weights/cfg/coco.data")
+
 # print(detect("data/dog.jpg"))
 import numpy as np
 import cv2
 import matplotlib.pylab as plt
 from sort import Sort
 import asyncio
-import seg_poliline_intersect, draw_lines from linetools
+from linetools import seg_poliline_intersect, draw_lines
 from lsd import getClassified
 from  backgroundExtraction import BackgroundExtractor
 from functions import scaleFrame
 from denseOpticalFlow import FlowModel
 colours = np.random.rand(32,3)*255
+
+detect = Detector(thresh=0.4,cfg="/data/weights/cfg/yolo.cfg",weights="/data/weights/yolo.weights",metafile="/data/weights/cfg/coco.data")
 
 def drawDetection(objs,frame):
     if objs:
@@ -69,12 +71,6 @@ def historyToTracks(hist):
 # cap = cv2.VideoCapture("/data/Simran Official Trailer _ Kangana Ranaut _  Hansal Mehta _ T-Series-_LUe4r6eeQA.mkv")
 # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/Jackson Hole Wyoming Town Square - SeeJH.com-psfFJR3vZ78.mp4")
 # cap.set(cv2.CAP_PROP_POS_FRAMES, 80000)
-# fgbg = cv2.createBackgroundSubtractorMOG2(history=2000, varThreshold=16,detectShadows=True )
-# fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()
-# fgbg = cv2.bgsegm.createBackgroundSubtractorCNT()
-# fgbg = cv2.bgsegm.createBackgroundSubtractorCNT(minPixelStability=200,useHistory=200,isParallel=True)
-framenum=0
-objs = False
 
 motTracker = Sort(max_age=30,min_hits=4)
 async def detectAsync():
@@ -85,15 +81,10 @@ async def detectAsync():
 loop = asyncio.get_event_loop()
 
 
-
-
-ret, frame = cap.read()
-cv2.imwrite("/tmp/todetect.jpg",frame)
-
 async def main():
     cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
     r0,f0 = cap.read()
-    f0 = scaleFrame(frame,factor=0.5)
+    f0 = scaleFrame(f0,factor=0.5)
     cv2.imwrite("/tmp/todetect.jpg",f0)
     framenum = 0
     loop = asyncio.get_event_loop()

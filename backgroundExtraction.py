@@ -12,11 +12,11 @@ from functions import scaleFrame
 class BackgroundExtractor:
     def __init__(self):
         self.fgbg = cv2.bgsegm.createBackgroundSubtractorCNT(minPixelStability=30,useHistory=50,isParallel=True)
-    def apply(frame):
-        fgmask = fgbg.apply(frame)
+    def apply(self,frame):
+        fgmask = self.fgbg.apply(frame)
         return fgmask
-    def getBackground():
-        return fgbg.getBackgroundImage()
+    def getBackground(self):
+        return self.fgbg.getBackgroundImage()
 
 if __name__ == '__main__':
     framenum=0

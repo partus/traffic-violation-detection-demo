@@ -232,13 +232,12 @@ imdir = "/data/img/taiwan/"
 source_img = os.listdir(imdir)[20]
 source_img = imdir+ source_img
 source_img
-source_img = "/data/road.png"
+# source_img = "/data/road.png"
 im= cv2.imread(source_img)
 plt.imshow(im)
 plt.rcParams['figure.figsize'] = (18, 9)
 
 t = cv2.cvtColor(imHsv,cv2.COLOR_BGR2GRAY)
-plt.imshow(scaleFrame(im,factor=10))
 imHsv = cv2.cvtColor(im, cv2.COLOR_RGB2HSV)
 plt.imshow(cutLow(imHsv[...,2],160),cmap="gray")
 cut = cutLow(imHsv[...,2],160)
@@ -246,7 +245,7 @@ plt.imshow(cut, cmap="gray")
 dilated = filter_mask(cut)
 plt.imshow(dilated, cmap="gray")
 ret,thresh1 = cv2.threshold(cut ,127,255,cv2.THRESH_BINARY)
-im2, contours, hierarchy = cv2.findContours(dilated.astype('uint8'),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+im2, contours, hierarchy = cv2.findContours(cut.astype('uint8'),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 t.shape
 np.save('/data/masked.pyn', cut)
 cv2.imwrite('/data/masked.png', cut)
@@ -260,6 +259,7 @@ t.astype()
 len(contours)
 t = cut.copy()
 len(filterContours(contours))
+plt.rcParams['figure.figsize'] = (18, 9)
 cv2.drawContours(im, filterContours(contours), -1, (0,255,0), 1)
 plt.imshow(im)
 
