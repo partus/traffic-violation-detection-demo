@@ -28,7 +28,8 @@ def flowToImage(flow):
     shape = list(flow.shape)
     shape[2] = 3
     hsv = np.zeros(shape, dtype=np.uint8)
-    hsv[...,0] = ang*180/np.pi/2
+    # hsv[...,0] = ang*180/np.pi/2
+    hsv[...,1] = ang*180/np.pi/2
     hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
     return cv2.cvtColor(hsv,cv2.COLOR_HSV2BGR)
 class FlowModel:
@@ -38,7 +39,7 @@ class FlowModel:
         self.prvs = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
     def applyFlow(self, next):
         prvs = self.prvs
-        print("fshape", prvs.shape, next.shape)
+        # print("fshape", prvs.shape, next.shape)
         return cv2.calcOpticalFlowFarneback(prvs,next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
     def apply(self,frame):
         next = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
@@ -56,7 +57,7 @@ class FlowModel:
         np.add(flow*0.003,mflow*0.997,out=mflow,where=mask)
         self.prvs = next
         return mflow
-    def getModel():
+    def getModel(self):
         return self.mflow
 
 if __name__ == '__main__':
@@ -82,7 +83,7 @@ if __name__ == '__main__':
             if (framenum %100) <50:
                 model.apply(frame2)
             # cv2.imshow('model',model.getModel())
-            cv2.imshow('flow',flowToImage(cutLow(model.getModel(),0.5)))
+            cv2.imshow('flow',flowToImage(model.getModel()))
             # cv2.imshow('frame3',hist)
             cv2.imshow('video',frame2)
         k = cv2.waitKey(10) & 0xff
