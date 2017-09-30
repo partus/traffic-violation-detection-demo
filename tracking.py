@@ -11,6 +11,8 @@ from lsd import getClassified
 from  backgroundExtraction import BackgroundExtractor
 from functions import scaleFrame
 from denseOpticalFlow import FlowModel
+from collections import deque
+
 colours = np.random.rand(32,3)*255
 
 detect = Detector(thresh=0.4,cfg="/data/weights/cfg/yolo.cfg",weights="/data/weights/yolo.weights",metafile="/data/weights/cfg/coco.data")
@@ -101,16 +103,26 @@ async def main():
     loop = asyncio.get_event_loop()
     detectFuture = loop.run_in_executor(None, detect, "/tmp/todetect.jpg")
     flow = FlowModel(f0)
-    bgExtractor = BackgroundExtractor()
 
+    bgExtractor = BackgroundExtractor()
+    def updateLines(que):
+        while len(que)> 0:
+            flow.apply(que.popleft())
+        model = flow.getModel()
+        parallel,front = getClassified(background,model)
+        return parallel, front
+
+    frameque = deque([],60)
     for i in range(100):
         print(i)
         r0,f0 = cap.read()
         f0 = scaleFrame(f0,factor=0.5)
+        frameque.append(f0)
         cv2.imshow("fg",bgExtractor.apply(f0))
         cv2.imshow("bg", bgExtractor.getBackground())
         cv2.waitKey(20)
     bgFuture = loop.run_in_executor(None, bgExtractor.apply, f0)
+    linesFuture = loop.run_in_executor(None, updateLines, frameque)
     # print(detectFuture.done())
     initiated = False
     while True:
@@ -125,6 +137,12 @@ async def main():
             # parallel,front = getClassified(background,fmodel)
 
             cv2.imwrite("/tmp/todetect.jpg",frame)
+
+            if(linesFuture.done()):
+                if(len(frameque) < 60):
+                    frameque.append(frame)
+                else:
+                    lineFuture = loop.run_in_executor(None, updateLines, frameque)
 
             if(bgFuture.done()):
 
