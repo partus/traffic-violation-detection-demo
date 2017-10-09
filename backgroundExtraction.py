@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 import matplotlib.pylab as plt
-from functions import scaleFrame
 
 # cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
 # fgbg = cv2.createBackgroundSubtractorMOG2(history=600, varThreshold=100,detectShadows=True )
@@ -29,7 +28,6 @@ if __name__ == '__main__':
         if not framenum % 25:
             cv2.imwrite("img/"+str(framenum)+".png",frame)
         if ret:
-            # frame = scaleFrame(frame, factor=0.25)
             if not framenum%100:
                 fgmask = extractor.apply(frame)
                 # binarymask = fgmask > 10

@@ -11,13 +11,11 @@ import os
 from moviepy.editor import VideoFileClip
 from IPython.display import HTML
 import math
-from linetools import joinClose as joinCloseLines, draw_lines
-# %matplotlib inline
-# %config InlineBackend.figure_format = "retina"
-# plt.rcParams['figure.figsize'] = (18, 9)
-import numpy.linalg as linalg
 
+import numpy.linalg as linalg
 from pylsd import lsd
+
+from linetools import joinClose, draw_lines
 
 def hough_lines(img,threshold = 80,minLineLength=80,maxLineGap=1):
     #
@@ -43,12 +41,10 @@ def getMainLines(image):
 
     canv = np.zeros(image.shape,dtype=np.uint8)
     draw_lines(canv,lines,thickness=2,color=255)
-    cv2.imshow("canv",canv)
-    cv2.waitKey(3000)
     hlines = hough_lines(canv,threshold = 80,minLineLength=70,maxLineGap=1)
 
     # return hlines
-    return joinCloseLines(hlines)
+    return joinClose(hlines)
 
 
 import numpy.ma as ma
@@ -179,6 +175,24 @@ if __name__ == '__main__':
     # flow = np.load('/data/np/flow_taiwan.npy')
     flow = np.load('/data/np/flow_tokyo.npy')
     im= cv2.imread(source_img)
+
+    im = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
+    parallel,front = getClassified(im,flow)
+
+
+
+
+    parallel,front
+    # %matplotlib inline
+    # %config InlineBackend.figure_format = "retina"
+    plt.rcParams['figure.figsize'] = (18, 9)
+
+    canv = cv2.imread(source_img)
+    draw_lines(canv,parallel, color=(0,0,255))
+    draw_lines(canv,front, color=(0,255,0))
+    plt.imshow(canv)
+
+
     hlines = getMainLines(im)
     hlines.shape
     draw_lines(im, hlines,thickness=3)

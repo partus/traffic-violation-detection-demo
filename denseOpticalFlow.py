@@ -1,5 +1,4 @@
 import cv2
-from functions import scaleFrame
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -68,7 +67,6 @@ if __name__ == '__main__':
     cap.set(cv2.CAP_PROP_POS_FRAMES, 102e3)
     ret, frame1 = cap.read()
     model = FlowModel(frame1)
-    # frame1 = scaleFrame(frame1)
     prvs = cv2.cvtColor(frame1,cv2.COLOR_BGR2GRAY)
     framenum = 0
 
@@ -78,7 +76,6 @@ if __name__ == '__main__':
         if not framenum%10:
             print(framenum)
 
-        # frame2 = scaleFrame(frame2)
         if ret:
             if (framenum % 100) <50:
                 model.apply(frame2)

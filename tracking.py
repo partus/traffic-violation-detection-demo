@@ -93,6 +93,13 @@ class Executor:
         if self.future.done():
             True
 
+def updateLines(que, flow, background):
+    while len(que)> 0:
+        flow.apply(que.popleft())
+    model = flow.getModel()
+    # background = bgExtractor.getBackground()
+    parallel,front = getClassified(background,model)
+    return parallel, front
 
 async def main():
     cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
@@ -105,12 +112,7 @@ async def main():
     flow = FlowModel(f0)
 
     bgExtractor = BackgroundExtractor()
-    def updateLines(que):
-        while len(que)> 0:
-            flow.apply(que.popleft())
-        model = flow.getModel()
-        parallel,front = getClassified(background,model)
-        return parallel, front
+
 
     frameque = deque([],60)
     for i in range(100):
@@ -122,7 +124,8 @@ async def main():
         cv2.imshow("bg", bgExtractor.getBackground())
         cv2.waitKey(20)
     bgFuture = loop.run_in_executor(None, bgExtractor.apply, f0)
-    linesFuture = loop.run_in_executor(None, updateLines, frameque)
+    linesFuture = loop.run_in_executor(None, updateLines, frameque,flow,bgExtractor.getBackground())
+    parallel,front =[],[]
     # print(detectFuture.done())
     initiated = False
     while True:
@@ -136,19 +139,23 @@ async def main():
             # fmodel = flow.apply(frame)
             # parallel,front = getClassified(background,fmodel)
 
-            cv2.imwrite("/tmp/todetect.jpg",frame)
-
+            # cv2.imwrite("/tmp/todetect.jpg",frame)
+            #
             if(linesFuture.done()):
                 if(len(frameque) < 60):
                     frameque.append(frame)
                 else:
-                    lineFuture = loop.run_in_executor(None, updateLines, frameque)
+                    print("got lines")
+                    parallel,front = linesFuture.result()
+                    linesFuture.cancel()
+                    linesFuture = loop.run_in_executor(None, updateLines, frameque,flow,bgExtractor.getBackground())
+            # if(linesFuture.done()):
+            #     print("linesFuture done")
 
-            if(bgFuture.done()):
-
-                bgFuture.cancel()
-                cv2.imshow("bg", bgExtractor.getBackground())
-                bgFuture = loop.run_in_executor(None, bgExtractor.apply, frame)
+            # if(bgFuture.done()):
+            #     bgFuture.cancel()
+            #     cv2.imshow("bg", bgExtractor.getBackground())
+            #     bgFuture = loop.run_in_executor(None, bgExtractor.apply, frame)
 
             if(detectFuture.done()):
                 initiated = True
@@ -158,6 +165,7 @@ async def main():
                 trackers,hist = motTracker.update(dets,True )
                 tracks = historyToTracks(hist)
                 detectFuture.cancel()
+                cv2.imwrite("/tmp/todetect.jpg",frame)
                 detectFuture = loop.run_in_executor(None, detect, "/tmp/todetect.jpg")
 
             if initiated:
@@ -168,8 +176,8 @@ async def main():
                     # print(trk)
                     cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:])
                 # cv2.polylines(frame, pol, False, (0,255,0))
-                # draw_lines(frame,parallel, color=(0,0,255))
-                # draw_lines(frame,front, color=(0,255,0))
+                draw_lines(frame,parallel, color=(0,0,255))
+                draw_lines(frame,front, color=(0,255,0))
 
             print(framenum)
             cv2.imshow('frame',frame)
