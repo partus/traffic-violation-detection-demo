@@ -158,7 +158,6 @@ def dispOpticalFlow( Image,Flow,Divisor=10,scaleArow=5 ):
     # return []
 
 def getClassified(im,flow):
-    cv2.imshow('gh',im)
     hlines = getMainLines(im)
     parallel,front = classify(flow,hlines)
     # draw_lines(im,parallel, color=(0,0,255))
