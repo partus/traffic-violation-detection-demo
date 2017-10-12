@@ -134,13 +134,7 @@ async def main():
         framenum+=1
         if ret:
             frame = scaleFrame(frame,factor=0.5)
-            # bgExtractor.apply(frame)
-            # background = bgExtractor.getBackground()
-            # fmodel = flow.apply(frame)
-            # parallel,front = getClassified(background,fmodel)
 
-            # cv2.imwrite("/tmp/todetect.jpg",frame)
-            #
             if(linesFuture.done()):
                 if(len(frameque) < 60):
                     frameque.append(frame)
@@ -149,8 +143,6 @@ async def main():
                     parallel,front = linesFuture.result()
                     linesFuture.cancel()
                     linesFuture = loop.run_in_executor(None, updateLines, frameque,flow,bgExtractor.getBackground())
-            # if(linesFuture.done()):
-            #     print("linesFuture done")
 
             # if(bgFuture.done()):
             #     bgFuture.cancel()
