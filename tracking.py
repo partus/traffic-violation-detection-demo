@@ -102,9 +102,11 @@ def updateLines(que, flow, background):
     return parallel, front
 
 async def main():
+    # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
     cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
+    # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/Jackson Hole Wyoming Town Square - SeeJH.com-psfFJR3vZ78.mp4")
     r0,f0 = cap.read()
-    f0 = scaleFrame(f0,factor=0.5)
+    # f0 = scaleFrame(f0,factor=0.5)
     cv2.imwrite("/tmp/todetect.jpg",f0)
     framenum = 0
     loop = asyncio.get_event_loop()
@@ -118,7 +120,7 @@ async def main():
     for i in range(100):
         print(i)
         r0,f0 = cap.read()
-        f0 = scaleFrame(f0,factor=0.5)
+        # f0 = scaleFrame(f0,factor=0.5)
         frameque.append(f0)
         cv2.imshow("fg",bgExtractor.apply(f0))
         cv2.imshow("bg", bgExtractor.getBackground())
@@ -133,7 +135,7 @@ async def main():
         ret, frame = cap.read()
         framenum+=1
         if ret:
-            frame = scaleFrame(frame,factor=0.5)
+            # frame = scaleFrame(frame,factor=0.5)
 
             if(linesFuture.done()):
                 if(len(frameque) < 60):
@@ -144,10 +146,10 @@ async def main():
                     linesFuture.cancel()
                     linesFuture = loop.run_in_executor(None, updateLines, frameque,flow,bgExtractor.getBackground())
 
-            # if(bgFuture.done()):
-            #     bgFuture.cancel()
-            #     cv2.imshow("bg", bgExtractor.getBackground())
-            #     bgFuture = loop.run_in_executor(None, bgExtractor.apply, frame)
+            if(bgFuture.done()):
+                bgFuture.cancel()
+                cv2.imshow("bg", bgExtractor.getBackground())
+                bgFuture = loop.run_in_executor(None, bgExtractor.apply, frame)
 
             if(detectFuture.done()):
                 initiated = True
@@ -168,7 +170,9 @@ async def main():
                     # print(trk)
                     cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:])
                 # cv2.polylines(frame, pol, False, (0,255,0))
-                draw_lines(frame,parallel, color=(0,0,255))
+                print("parallel")
+                print(parallel)
+                draw_lines(frame,parallel, color=(255,0,255))
                 draw_lines(frame,front, color=(0,255,0))
 
             print(framenum)
