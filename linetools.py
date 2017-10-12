@@ -26,11 +26,12 @@ def seg_intersect(a1,a2, b1,b2) :
         return coef*db + b1
 
 def seg_poliline_intersect(seg,pol):
-    res = False
+    res = []
     for l1,l2 in itertools.izip(pol,pol[1:]):
-        if not seg_intersect(l1[0:2],l1[2:4],l2[0:2],l2[2:4]) is None:
-            res=True
-            break
+        point = seg_intersect(l1[0:2],l1[2:4],l2[0:2],l2[2:4])
+        if not point is None:
+            res.append(point)
+            # break
     return res
 
 

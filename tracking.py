@@ -169,9 +169,14 @@ async def main():
                 for trk in tracks:
                     # print(trk)
                     cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:])
+                    for line in allLines:
+                        intersects = seg_poliline_intersect(line,trk[0])
+                        for intersect in intersects:
+                            cv.Circle(frame, intersect, 5, (0,0,255), thickness=3, lineType=8, shift=0) 
                 # cv2.polylines(frame, pol, False, (0,255,0))
                 print("parallel")
                 print(parallel)
+                draw_lines(frame,allLines, color=(255,255,0))
                 draw_lines(frame,parallel, color=(255,0,255))
                 draw_lines(frame,front, color=(0,255,0))
 
