@@ -98,8 +98,8 @@ def updateLines(que, flow, background):
         flow.apply(que.popleft())
     model = flow.getModel()
     # background = bgExtractor.getBackground()
-    parallel,front = getClassified(background,model)
-    return parallel, front
+    allLines,parallel,front = getClassified(background,model)
+    return allLines,parallel, front
 
 async def main():
     # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
@@ -127,7 +127,7 @@ async def main():
         cv2.waitKey(20)
     bgFuture = loop.run_in_executor(None, bgExtractor.apply, f0)
     linesFuture = loop.run_in_executor(None, updateLines, frameque,flow,bgExtractor.getBackground())
-    parallel,front =[],[]
+    allLines,parallel,front =[],[],[]
     # print(detectFuture.done())
     initiated = False
     while True:
@@ -142,7 +142,7 @@ async def main():
                     frameque.append(frame)
                 else:
                     print("got lines")
-                    parallel,front = linesFuture.result()
+                    allLines,parallel,front = linesFuture.result()
                     linesFuture.cancel()
                     linesFuture = loop.run_in_executor(None, updateLines, frameque,flow,bgExtractor.getBackground())
 

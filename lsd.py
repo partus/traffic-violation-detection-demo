@@ -162,7 +162,7 @@ def getClassified(im,flow):
     parallel,front = classify(flow,hlines)
     # draw_lines(im,parallel, color=(0,0,255))
     # draw_lines(im,front, color=(0,255,0))
-    return parallel,front
+    return hlines,parallel,front
 
 if __name__ == '__main__':
     imdir = "/data/img/taiwan/"
@@ -176,7 +176,7 @@ if __name__ == '__main__':
     im= cv2.imread(source_img)
 
     im = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
-    parallel,front = getClassified(im,flow)
+    allLines,parallel,front = getClassified(im,flow)
 
 
 
