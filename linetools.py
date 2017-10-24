@@ -17,19 +17,29 @@ def seg_intersect(a1,a2, b1,b2) :
     db = b2-b1
     dp = a1-b1
     dap = perp(da)
+
     denom = dot( dap, db)
-    num = dot( dap, dp )
-    coef = (num / denom.astype(float))
-    if(coef > 1):
+    numa = dot( dap, dp )
+    coef = (numa / denom.astype(float))
+
+    # dbp = perp(db)
+    # numb = dot( dbp, dp )
+    # coefb = (numb / denom.astype(float))
+    #
+    #
+
+    if(coef > 1 or coef < 0):
         return None
     else:
         return coef*db + b1
 
 def seg_poliline_intersect(seg,pol):
     res = []
-    for l1,l2 in itertools.izip(pol,pol[1:]):
-        point = seg_intersect(l1[0:2],l1[2:4],l2[0:2],l2[2:4])
-        if not point is None:
+    for p1, p2 in zip(pol,pol[1:]):
+        # print(p1,p2)
+        point = seg_intersect(seg[0,0:2],seg[0,2:4],p1[0],p2[0])
+        pointr = seg_intersect(p1[0],p2[0],seg[0,0:2],seg[0,2:4])
+        if not point is None and not pointr is None:
             res.append(point)
             # break
     return res

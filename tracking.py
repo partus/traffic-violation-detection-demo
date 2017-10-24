@@ -7,7 +7,7 @@ import matplotlib.pylab as plt
 from sort import Sort
 import asyncio
 from linetools import seg_poliline_intersect, draw_lines
-from lsd import getClassified
+from lsd import getClassified,getMainLines
 from  backgroundExtraction import BackgroundExtractor
 from functions import scaleFrame
 from denseOpticalFlow import FlowModel
@@ -93,7 +93,7 @@ class Executor:
         if self.future.done():
             True
 
-def updateLines(que, flow, background):
+def _updateLines(que, flow, background):
     while len(que)> 0:
         flow.apply(que.popleft())
     model = flow.getModel()
@@ -101,9 +101,20 @@ def updateLines(que, flow, background):
     allLines,parallel,front = getClassified(background,model)
     return allLines,parallel, front
 
+def updateLines(que, flow, background):
+    while len(que)> 0:
+        que.popleft()
+    # model = flow.getModel()
+    # background = bgExtractor.getBackground()
+    allLines = getMainLines(background)
+    return allLines,[],[]
+
 async def main():
     # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
-    cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
+    # cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
+    cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/taiwan.mp4")
+    # cap = cv2.VideoCapture('/data/livetraffic/2017-07-18/La Grange, KY - Virtual Railfan LIVE (La Grange, KY North)-Bv3l77cRRGY.mp4')
+    # cap.set(cv2.CAP_PROP_POS_FRAMES, 80000)
     # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/Jackson Hole Wyoming Town Square - SeeJH.com-psfFJR3vZ78.mp4")
     r0,f0 = cap.read()
     # f0 = scaleFrame(f0,factor=0.5)
@@ -145,11 +156,11 @@ async def main():
                     allLines,parallel,front = linesFuture.result()
                     linesFuture.cancel()
                     linesFuture = loop.run_in_executor(None, updateLines, frameque,flow,bgExtractor.getBackground())
-
-            if(bgFuture.done()):
-                bgFuture.cancel()
-                cv2.imshow("bg", bgExtractor.getBackground())
-                bgFuture = loop.run_in_executor(None, bgExtractor.apply, frame)
+            if not framenum % 5:
+                if(bgFuture.done()):
+                    bgFuture.cancel()
+                    cv2.imshow("bg", bgExtractor.getBackground())
+                    bgFuture = loop.run_in_executor(None, bgExtractor.apply, frame)
 
             if(detectFuture.done()):
                 initiated = True
@@ -169,10 +180,10 @@ async def main():
                 for trk in tracks:
                     # print(trk)
                     cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:])
-                    for line in allLines:
-                        intersects = seg_poliline_intersect(line,trk[0])
-                        for intersect in intersects:
-                            cv.Circle(frame, intersect, 5, (0,0,255), thickness=3, lineType=8, shift=0) 
+                    # for line in allLines:
+                    #     intersects = seg_poliline_intersect(line,trk[0])
+                    #     for intersect in intersects:
+                    #         cv2.circle(frame, tuple(intersect.astype(np.uint32)), 5, (0,0,255), thickness=3, lineType=8, shift=0)
                 # cv2.polylines(frame, pol, False, (0,255,0))
                 print("parallel")
                 print(parallel)
