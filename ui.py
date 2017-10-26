@@ -16,6 +16,7 @@ class LineTypeSelector(Gtk.Box):
     def __init__(self):
         super(Gtk.Box, self).__init__(spacing=6)
         hbox = self
+        self.hasLightBox = False
 
         button1 = Gtk.RadioButton.new_with_label_from_widget(None, "Dividing")
         button1.connect("toggled", self.on_button_toggled, "par" )
@@ -32,8 +33,14 @@ class LineTypeSelector(Gtk.Box):
             state = "on"
             if name == "front":
                 print("front")
-                self.hbox.pack_start(LineColorSelector(), False, False, 0)
+                self.hasLightBox = True
+                self.lightBox = LineColorSelector()
+                self.hbox.pack_start(self.lightBox, False, False, 0)
                 self.hbox.show_all()
+            if name == "par":
+                if(self.hasLightBox):
+                    print("destroy")
+                    self.lightBox.destroy()
         else:
             state = "off"
         print("Button", name, "was turned", state)
