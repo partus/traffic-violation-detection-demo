@@ -81,7 +81,7 @@ async def detectAsync():
     objs = detect("/tmp/todetect.jpg")
     return objs
     # return objs
-loop = asyncio.get_event_loop()
+
 
 # async def futurise():
 
@@ -135,8 +135,8 @@ async def main():
         r0,f0 = cap.read()
         # f0 = scaleFrame(f0,factor=0.5)
         frameque.append(f0)
-        cv2.imshow("fg",bgExtractor.apply(f0))
-        cv2.imshow("bg", bgExtractor.getBackground())
+        # cv2.imshow("fg",bgExtractor.apply(f0))
+        # cv2.imshow("bg", bgExtractor.getBackground())
         cv2.waitKey(20)
     bgFuture = loop.run_in_executor(None, bgExtractor.apply, f0)
     linesFuture = loop.run_in_executor(None, updateLines, frameque,flow,bgExtractor.getBackground())
@@ -161,7 +161,7 @@ async def main():
             if not framenum % 5:
                 if(bgFuture.done()):
                     bgFuture.cancel()
-                    cv2.imshow("bg", bgExtractor.getBackground())
+                    # cv2.imshow("bg", bgExtractor.getBackground())
                     bgFuture = loop.run_in_executor(None, bgExtractor.apply, frame)
 
             if(detectFuture.done()):
@@ -194,13 +194,13 @@ async def main():
                 draw_lines(frame,front, color=(0,255,0))
 
             print(framenum)
-            cv2.imshow('frame',frame)
+            # cv2.imshow('frame',frame)
         else:
             print("noit ok")
         k = cv2.waitKey(30) & 0xff
-
-loop.run_until_complete(main())
-
-print("complete")
-cap.release()
-cv2.destroyAllWindows()
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+    print("complete")
+    cap.release()
+# cv2.destroyAllWindows()

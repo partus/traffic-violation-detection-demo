@@ -5,7 +5,7 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GLib, GdkPixbuf
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/taiwan.mp4")
 
 builder = Gtk.Builder()
 builder.add_from_file("test.glade")
