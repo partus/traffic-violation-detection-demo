@@ -46,5 +46,7 @@ def show_frame(*args):
     image.set_from_pixbuf(pb.copy())
     return True
 
-GLib.idle_add(show_frame)
+from tracking import tracking
+GLib.idle_add(tracking)
+# GLib.idle_add(show_frame)
 Gtk.main()

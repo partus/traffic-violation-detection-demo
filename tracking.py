@@ -194,10 +194,15 @@ async def main():
                 draw_lines(frame,front, color=(0,255,0))
 
             print(framenum)
-            # cv2.imshow('frame',frame)
+            #cv2.imshow('frame',frame)
         else:
             print("noit ok")
         k = cv2.waitKey(30) & 0xff
+def tracking():
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+    print("complete")
+    cap.release()
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
