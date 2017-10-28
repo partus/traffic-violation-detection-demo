@@ -71,6 +71,8 @@ def areClose(l1,l2):
     else:
         return False
 
+areSame = areClose
+
 def joinTwoLines(l1,l2):
     maxnorm = 0
     pair = ()

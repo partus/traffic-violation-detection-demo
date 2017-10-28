@@ -38,7 +38,7 @@ def detsYoloToSortInput(objs):
 def drawSortDetections(trackers,frame):
     for d in trackers:
         d = d.astype(np.int32)
-        cv2.rectangle(frame,(d[0],d[1]),(d[2],d[3]), colours[d[4]%32,:], thickness=1, lineType=8, shift=0)
+        cv2.rectangle(frame,(d[0],d[1]),(d[2],d[3]), colours[d[4]%32,:], thickness=2, lineType=8, shift=0)
 
 def drawSortHistory(history, frame):
     for h in history:
@@ -46,7 +46,7 @@ def drawSortHistory(history, frame):
         color = colours[h[1]%32,:]
         for rect in trck:
             d = rect[0].astype(np.int32)
-            cv2.rectangle(frame,(d[0],d[1]),(d[2],d[3]), color, thickness=1, lineType=8, shift=0)
+            cv2.rectangle(frame,(d[0],d[1]),(d[2],d[3]), color, thickness=3, lineType=8, shift=0)
 
 def historyToPolylines(hist):
     ret = []
