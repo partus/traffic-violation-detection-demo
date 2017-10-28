@@ -12,6 +12,7 @@ from  backgroundExtraction import BackgroundExtractor
 from functions import scaleFrame
 from denseOpticalFlow import FlowModel
 from collections import deque
+from ui import startUi
 
 colours = np.random.rand(32,3)*255
 
@@ -122,6 +123,7 @@ async def main():
     framenum = 0
     loop = asyncio.get_event_loop()
     detectFuture = loop.run_in_executor(None, detect, "/tmp/todetect.jpg")
+    detectFuture = loop.run_in_executor(None, startUi)
     flow = FlowModel(f0)
 
     bgExtractor = BackgroundExtractor()

@@ -1,80 +1,75 @@
-# import gi
-# gi.require_version('Gtk', '3.0')
-# from gi.repository import Gtk
-#
-# win = Gtk.Window()
-# win.connect("delete-event", Gtk.main_quit)
-# win.show_all()
-# Gtk.main()
-
-
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk,Gdk
+from gi.repository import Gtk
+from ui2 import LineTypeSelector
 
-class LineTypeSelector(Gtk.Box):
+
+class ListBoxRowWithData(Gtk.ListBoxRow):
+    def __init__(self, data):
+        super(Gtk.ListBoxRow, self).__init__()
+        self.data = data
+        self.add(Gtk.Label(data))
+
+class ListBoxWindow(Gtk.Window):
+
     def __init__(self):
-        super(Gtk.Box, self).__init__(spacing=6)
-        hbox = self
-        self.hasLightBox = False
+        Gtk.Window.__init__(self, title="Line Type Selector")
+        self.set_border_width(10)
 
-        button1 = Gtk.RadioButton.new_with_label_from_widget(None, "Dividing")
-        button1.connect("toggled", self.on_button_toggled, "par" )
-        hbox.pack_start(button1, False, False, 0)
+        box_outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        self.add(box_outer)
 
-        button2 = Gtk.RadioButton.new_from_widget(button1)
-        button2.set_label("Front")
-        button2.connect("toggled", self.on_button_toggled, "front" )
-        hbox.pack_start(button2, False, False, 0)
-        self.hbox = hbox
-        # hbox.pack_start(LineColorSelector(), False, False, 0)
-    def on_button_toggled(self, button, name):
-        if button.get_active():
-            state = "on"
-            if name == "front":
-                print("front")
-                self.hasLightBox = True
-                self.lightBox = LineColorSelector()
-                self.hbox.pack_start(self.lightBox, False, False, 0)
-                self.hbox.show_all()
-            if name == "par":
-                if(self.hasLightBox):
-                    print("destroy")
-                    self.lightBox.destroy()
-        else:
-            state = "off"
-        print("Button", name, "was turned", state)
+        listbox = Gtk.ListBox()
+        listbox.set_selection_mode(Gtk.SelectionMode.NONE)
+        box_outer.pack_start(listbox, True, True, 0)
 
-class LineColorSelector(Gtk.Box):
-    def get_color(self,rgb):
-        colorh=rgb
-        color=Gdk.RGBA()
-        color.parse(colorh)
-        color.to_string()
-        return color
-    def __init__(self):
-        super(Gtk.Box, self).__init__(spacing=6)
-        hbox = self
-        button1 = Gtk.RadioButton.new_with_label_from_widget(None, "R")
-        # button1.modify_bg(Gtk.StateType.PRELIGHT, Gdk.color_parse('#234fdb'))
+        row = Gtk.ListBoxRow()
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
+        row.add(hbox)
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        hbox.pack_start(vbox, True, True, 0)
 
-        button1.override_background_color(Gtk.StateFlags.NORMAL, self.get_color("#FF0000"))
-        button1.connect("toggled", self.on_button_toggled, "1")
-        hbox.pack_start(button1, False, False, 0)
+        label1 = Gtk.Label("Automatic Date & Time", xalign=0)
+        label2 = Gtk.Label("Requires internet access", xalign=0)
+        vbox.pack_start(label1, True, True, 0)
+        vbox.pack_start(label2, True, True, 0)
 
-        button2 = Gtk.RadioButton.new_with_mnemonic_from_widget(button1,"Y")
-        button2.override_background_color(Gtk.StateFlags.NORMAL, self.get_color("#FFFF00"))
-        button2.connect("toggled", self.on_button_toggled, "2")
-        hbox.pack_start(button2, False, False, 0)
+        switch = Gtk.Switch()
+        switch.props.valign = Gtk.Align.CENTER
+        hbox.pack_start(switch, False, True, 0)
 
-        button3 = Gtk.RadioButton.new_with_mnemonic_from_widget(button1,"G")
-        button3.override_background_color(Gtk.StateFlags.NORMAL, self.get_color("#00FF00"))
-        button3.connect("toggled", self.on_button_toggled, "3")
-        hbox.pack_start(button3, False, False, 0)
+        listbox.add(row)
 
-    def on_button_toggled(self, button, name):
-        if button.get_active():
-            state = "on"
-        else:
-            state = "off"
-        print("Button", name, "was turned", state)
+        row = Gtk.ListBoxRow()
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
+        row.add(hbox)
+        label = Gtk.Label("Enable Automatic Update", xalign=0)
+        check = Gtk.CheckButton()
+        hbox.pack_start(label, True, True, 0)
+        hbox.pack_start(check, False, True, 0)
+
+        listbox.add(row)
+
+        row = Gtk.ListBoxRow()
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
+        row.add(hbox)
+        label = Gtk.Label("Date Format", xalign=0)
+        combo = Gtk.ComboBoxText()
+        combo.insert(0, "0", "24-hour")
+        combo.insert(1, "1", "AM/PM")
+        hbox.pack_start(label, True, True, 0)
+        hbox.pack_start(combo, False, True, 0)
+
+        listbox.add(row)
+        for i in range(10):
+            row = Gtk.ListBoxRow()
+            row.add(LineTypeSelector())
+            listbox.add(row)
+def startUi():
+    win = ListBoxWindow()
+    win.connect("delete-event", Gtk.main_quit)
+    win.show_all()
+    Gtk.main()
+
+if __name__ == '__main__':
+    startUi()
