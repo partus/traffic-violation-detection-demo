@@ -137,7 +137,6 @@ async def main():
         frameque.append(f0)
         # cv2.imshow("fg",bgExtractor.apply(f0))
         # cv2.imshow("bg", bgExtractor.getBackground())
-        cv2.waitKey(20)
     bgFuture = loop.run_in_executor(None, bgExtractor.apply, f0)
     linesFuture = loop.run_in_executor(None, updateLines, frameque,flow,bgExtractor.getBackground())
     allLines,parallel,front =[],[],[]
@@ -154,7 +153,7 @@ async def main():
                 if(len(frameque) < 60):
                     frameque.append(frame)
                 else:
-                    print("got lines")
+                    print("got lines", allLines)
                     allLines,parallel,front = linesFuture.result()
                     linesFuture.cancel()
                     linesFuture = loop.run_in_executor(None, updateLines, frameque,flow,bgExtractor.getBackground())
