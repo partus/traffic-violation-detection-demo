@@ -29,7 +29,7 @@ builder.get_object("lineMenu").add(LineSelectionList())
 window.show_all()
 builder.connect_signals(Handler())
 
-def show_frame(*args):
+def show_frame1(*args):
     ret, frame = cap.read()
     frame = cv2.resize(frame, None, fx=2, fy=2, interpolation = cv2.INTER_CUBIC)
     if greyscale:
@@ -50,7 +50,19 @@ def show_frame(*args):
     image.set_from_pixbuf(pb.copy())
     return True
 
-# from tracking import tracking
-# GLib.idle_add(tracking)
-GLib.idle_add(show_frame)
+def show_frame(frame):
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    pb = GdkPixbuf.Pixbuf.new_from_data(frame.tostring(),
+                                        GdkPixbuf.Colorspace.RGB,
+                                        False,
+                                        8,
+                                        frame.shape[1],
+                                        frame.shape[0],
+                                        frame.shape[2]*frame.shape[1])
+    image.set_from_pixbuf(pb.copy())
+
+from tracking import Tracking
+tracking = Tracking(show_frame)
+GLib.idle_add(tracking)
+# GLib.idle_add(show_frame)
 Gtk.main()

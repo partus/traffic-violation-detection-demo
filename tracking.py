@@ -110,7 +110,7 @@ def updateLines(que, flow, background):
     allLines = getMainLines(background)
     return allLines,[],[]
 
-async def main():
+async def main(display):
     # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
     # cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
     cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/taiwan.mp4")
@@ -196,15 +196,25 @@ async def main():
                 draw_lines(frame,front, color=(0,255,0))
 
             print(framenum)
-            #cv2.imshow('frame',frame)
+            display(frame)
         else:
             print("noit ok")
         k = cv2.waitKey(30) & 0xff
+
+class Tracking:
+    def __init__(self,display):
+        self.display = display
+    def __call__(self):
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(main(self.display))
+
 def tracking():
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
     print("complete")
     cap.release()
+
+
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
