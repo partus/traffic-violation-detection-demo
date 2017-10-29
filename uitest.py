@@ -20,12 +20,12 @@ class Handler:
     def toggleGreyscale(self, *args):
         global greyscale
         greyscale = ~ greyscale
-    def onPixelClicked (box, event):
-       print event.x, event.y
+    def onPixelClicked (self,box, event):
+       print(event.x, event.y)
 
 window = builder.get_object("window1")
 image = builder.get_object("image")
-builder.get_object("lineMenu").add(LineSelectionList)
+builder.get_object("lineMenu").add(LineSelectionList())
 window.show_all()
 builder.connect_signals(Handler())
 
@@ -51,11 +51,6 @@ def show_frame(*args):
     return True
 
 # from tracking import tracking
-<<<<<<< HEAD
 # GLib.idle_add(tracking)
 GLib.idle_add(show_frame)
-=======
-GLib.idle_add(tracking)
-# GLib.idle_add(show_frame)
->>>>>>> 36c1dbe5eaef4ac773ee119a65bafec9bdcb45c9
 Gtk.main()
