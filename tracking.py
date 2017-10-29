@@ -12,7 +12,6 @@ from  backgroundExtraction import BackgroundExtractor
 from functions import scaleFrame
 from denseOpticalFlow import FlowModel
 from collections import deque
-from ui import startUi
 
 colours = np.random.rand(32,3)*255
 
@@ -123,7 +122,6 @@ async def main(display,lineStorage):
     framenum = 0
     loop = asyncio.get_event_loop()
     detectFuture = loop.run_in_executor(None, detect, "/tmp/todetect.jpg")
-    detectFuture = loop.run_in_executor(None, startUi)
     flow = FlowModel(f0)
 
     bgExtractor = BackgroundExtractor()
@@ -212,14 +210,18 @@ class Tracking:
 
 def tracking():
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    def display(frame):
+        cv.imshow('frame',frame)
+    loop.run_until_complete(main(display))
     print("complete")
     cap.release()
 
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    def display(frame):
+        cv2.imshow('frame',frame)
+    loop.run_until_complete(main(display))
     print("complete")
     cap.release()
 # cv2.destroyAllWindows()
