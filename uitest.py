@@ -16,18 +16,20 @@ lineStorage = LineStorage()
 class Handler:
     def onDeleteWindow(self, *args):
         Gtk.main_quit(*args)
-
+        tracking.stop()
     def toggleGreyscale(self, *args):
         global greyscale
         greyscale = ~ greyscale
     def onPixelClicked (self,box, event):
         point = np.array([event.x, event.y],dtype=np.int32)
+        lineSelectionList.add(4)
         print(lineStorage.clickMatch(point))
         print(point)
 
 window = builder.get_object("window1")
 image = builder.get_object("image")
-builder.get_object("lineMenu").add(LineSelectionList())
+lineSelectionList = lineSelectionList()
+builder.get_object("lineMenu").add(lineSelectionList)
 window.show_all()
 builder.connect_signals(Handler())
 

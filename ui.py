@@ -13,6 +13,7 @@ class ListBoxRowWithData(Gtk.ListBoxRow):
 class LineSelectionList(Gtk.Box):
     def __init__(self):
         super(Gtk.Box, self).__init__(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        self.list = {}
         box_outer = self
         listbox = Gtk.ListBox()
         listbox.set_selection_mode(Gtk.SelectionMode.NONE)
@@ -56,10 +57,19 @@ class LineSelectionList(Gtk.Box):
         hbox.pack_start(combo, False, True, 0)
 
         listbox.add(row)
-        for i in range(10):
-            row = Gtk.ListBoxRow()
-            row.add(LineTypeSelector())
-            listbox.add(row)
+        for i in range(2):
+            self.add(i)
+    def add(self,id):
+        row = Gtk.ListBoxRow()
+        self.list[id] = row
+        row.add(LineTypeSelector())
+        listbox.add(row)
+    def getSmallest(self):
+        i= 0
+        while self.list.has_key(i):
+            i+=1
+        return i
+       
 class ListBoxWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Line Type Selector")
