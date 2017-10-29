@@ -4,6 +4,7 @@ import gi
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GLib, GdkPixbuf
+from ui import LineSelectionList
 
 cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/taiwan.mp4")
 
@@ -21,9 +22,10 @@ class Handler:
         greyscale = ~ greyscale
     def onPixelClicked (box, event):
        print event.x, event.y
-       
+
 window = builder.get_object("window1")
 image = builder.get_object("image")
+builder.get_object("lineMenu").add(LineSelectionList)
 window.show_all()
 builder.connect_signals(Handler())
 

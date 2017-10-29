@@ -10,15 +10,10 @@ class ListBoxRowWithData(Gtk.ListBoxRow):
         self.data = data
         self.add(Gtk.Label(data))
 
-class ListBoxWindow(Gtk.Window):
-
+class LineSelectionList(Gtk.Box):
     def __init__(self):
-        Gtk.Window.__init__(self, title="Line Type Selector")
-        self.set_border_width(10)
-
-        box_outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        self.add(box_outer)
-
+        super(Gtk.Box, self).__init__(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        box_outer = self
         listbox = Gtk.ListBox()
         listbox.set_selection_mode(Gtk.SelectionMode.NONE)
         box_outer.pack_start(listbox, True, True, 0)
@@ -65,6 +60,14 @@ class ListBoxWindow(Gtk.Window):
             row = Gtk.ListBoxRow()
             row.add(LineTypeSelector())
             listbox.add(row)
+class ListBoxWindow(Gtk.Window):
+    def __init__(self):
+        Gtk.Window.__init__(self, title="Line Type Selector")
+        self.set_border_width(10)
+
+        box_outer = LineSelectionList()
+        self.add(box_outer)
+
 def startUi():
     win = ListBoxWindow()
     win.connect("delete-event", Gtk.main_quit)
