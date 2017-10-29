@@ -133,9 +133,10 @@ class LineStorage:
         for line in self.lines:
             a,b = lineToVec(line)
             if(linalg.norm(a-point) + linalg.norm(b-point) < linalg.norm(a-b)+10):
-                return True
+                return line
         return None
     def getGroups(self):
+
         True
 
 
