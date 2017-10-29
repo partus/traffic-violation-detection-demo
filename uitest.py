@@ -48,5 +48,5 @@ def show_frame(*args):
 
 # from tracking import tracking
 # GLib.idle_add(tracking)
-# GLib.idle_add(show_frame)
+GLib.idle_add(show_frame)
 Gtk.main()
