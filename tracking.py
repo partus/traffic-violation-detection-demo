@@ -110,7 +110,7 @@ def updateLines(que, flow, background):
     allLines = getMainLines(background)
     return allLines,[],[]
 
-async def main(display):
+async def main(display,lineStorage):
     # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
     # cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
     cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/taiwan.mp4")
@@ -158,6 +158,7 @@ async def main(display):
                 else:
                     print("got lines", allLines)
                     allLines,parallel,front = linesFuture.result()
+                    lineStorage.apply(allLines)
                     linesFuture.cancel()
                     linesFuture = loop.run_in_executor(None, updateLines, frameque,flow,bgExtractor.getBackground())
             if not framenum % 20:
@@ -202,11 +203,12 @@ async def main(display):
         k = cv2.waitKey(30) & 0xff
 
 class Tracking:
-    def __init__(self,display):
+    def __init__(self,display,lineStorage):
         self.display = display
     def __call__(self):
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(main(self.display))
+        loop.run_until_complete(main(self.display,lineStorage))
+
 
 def tracking():
     loop = asyncio.get_event_loop()

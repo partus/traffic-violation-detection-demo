@@ -120,7 +120,22 @@ def draw_lines(img, lines, extend=0, color=[255, 0, 0],extendColor=[0, 255, 0], 
                          tuple(b - vec * extend),extendColor , thickness)
             cv2.line(img, tuple(a), tuple(b), color, thickness)
         # return img
+class LineStorage:
 
+    def __init__(self):
+        self.lines = []
+        True
+    def apply(self,lines):
+        self.lines = []
+        True
+    def clickMatch(self,point):
+        for line in self.lines:
+            a,b = lineToVec(line)
+            if(linalg.norm(a-point) + linalg.norm(b-point) < linalg.norm(a-b)+3):
+                return True
+        return None
+    def getGroups(self):
+        True
 
 
 # hlines

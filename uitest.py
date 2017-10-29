@@ -11,8 +11,8 @@ cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/taiwan.mp4")
 builder = Gtk.Builder()
 builder.add_from_file("test.glade")
 
-greyscale = False
-
+from linetools import LineStorage
+lineStorage = LineStorage()
 class Handler:
     def onDeleteWindow(self, *args):
         Gtk.main_quit(*args)
@@ -21,7 +21,9 @@ class Handler:
         global greyscale
         greyscale = ~ greyscale
     def onPixelClicked (self,box, event):
-       print(event.x, event.y)
+        point = np.array([event.x, event.y],astype=np.int32)
+        print(lineStorage.clickMatch(point))
+        print(point)
 
 window = builder.get_object("window1")
 image = builder.get_object("image")
@@ -29,26 +31,6 @@ builder.get_object("lineMenu").add(LineSelectionList())
 window.show_all()
 builder.connect_signals(Handler())
 
-def show_frame1(*args):
-    ret, frame = cap.read()
-    frame = cv2.resize(frame, None, fx=2, fy=2, interpolation = cv2.INTER_CUBIC)
-    if greyscale:
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
-    else:
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-    pb = GdkPixbuf.Pixbuf.new_from_data(frame.tostring(),
-                                        GdkPixbuf.Colorspace.RGB,
-                                        False,
-                                        8,
-                                        frame.shape[1],
-                                        frame.shape[0],
-                                        frame.shape[2]*frame.shape[1])
-    image.set_from_pixbuf(pb.copy())
-    return True
 
 def show_frame(frame):
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -62,7 +44,7 @@ def show_frame(frame):
     image.set_from_pixbuf(pb.copy())
 
 from tracking import Tracking
-tracking = Tracking(show_frame)
+tracking = Tracking(show_frame, lineStorage)
 GLib.idle_add(tracking)
 # GLib.idle_add(show_frame)
 Gtk.main()
