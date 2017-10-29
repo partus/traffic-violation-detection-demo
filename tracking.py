@@ -146,8 +146,8 @@ async def main(display,lineStorage):
     allLines,parallel,front =[],[],[]
     # print(detectFuture.done())
     initiated = False
-    while True:
-        await asyncio.sleep(0)
+    while framenum < 500:
+        await asyncio.sleep(0.02)
         ret, frame = cap.read()
         framenum+=1
         if ret:
@@ -201,16 +201,14 @@ async def main(display,lineStorage):
             display(frame)
         else:
             print("noit ok")
-        time.sleep(0.1)
-        k = cv2.waitKey(30) & 0xff
-
+        cv2.waitKey(1)
 class Tracking:
     def __init__(self,display,lineStorage):
         self.display = display
         self.lineStorage = lineStorage
         self.loop = asyncio.get_event_loop()
     def __call__(self):
-        self.loop.run_until_complete(main(self.display,self.lineStorage))        
+        self.loop.run_until_complete(main(self.display,self.lineStorage))
     def stop(self):
         self.loop.close()
 

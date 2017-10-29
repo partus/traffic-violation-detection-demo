@@ -22,13 +22,16 @@ class Handler:
         greyscale = ~ greyscale
     def onPixelClicked (self,box, event):
         point = np.array([event.x, event.y],dtype=np.int32)
-        lineSelectionList.add(4)
-        print(lineStorage.clickMatch(point))
-        print(point)
+        match = lineStorage.clickMatch(point)
+        if not match is None:
+            lineSelectionList.add(4)
+            lineSelectionList.show_all()
+            print(lineStorage.clickMatch(point))
+            print(point)
 
 window = builder.get_object("window1")
 image = builder.get_object("image")
-lineSelectionList = lineSelectionList()
+lineSelectionList = LineSelectionList()
 builder.get_object("lineMenu").add(lineSelectionList)
 window.show_all()
 builder.connect_signals(Handler())
