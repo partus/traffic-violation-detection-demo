@@ -130,11 +130,14 @@ async def main():
 
 
     frameque = deque([],60)
-    for i in range(100):
-        print(i)
-        r0,f0 = cap.read()
-        # f0 = scaleFrame(f0,factor=0.5)
-        frameque.append(f0)
+    for i in range(4000):
+        if not i % 40:
+            print(i)
+            r0,f0 = cap.read()
+            # f0 = scaleFrame(f0,factor=0.5)
+            if(r0):
+                frameque.append(f0)
+                bgExtractor.apply(f0)
         # cv2.imshow("fg",bgExtractor.apply(f0))
         # cv2.imshow("bg", bgExtractor.getBackground())
     bgFuture = loop.run_in_executor(None, bgExtractor.apply, f0)
@@ -157,7 +160,7 @@ async def main():
                     allLines,parallel,front = linesFuture.result()
                     linesFuture.cancel()
                     linesFuture = loop.run_in_executor(None, updateLines, frameque,flow,bgExtractor.getBackground())
-            if not framenum % 5:
+            if not framenum % 20:
                 if(bgFuture.done()):
                     bgFuture.cancel()
                     # cv2.imshow("bg", bgExtractor.getBackground())
