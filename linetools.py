@@ -124,21 +124,43 @@ class LineStorage:
 
     def __init__(self):
         self.lines = []
+        self.groups = {}
         True
+
     def apply(self,lines):
         self.lines = lines
+        for id,group in self.groups.items():
+            group['other'] = []
+            for line in lines:
+                if(areClose(group['main'],line)):
+                    group['other'].append(line)
         True
+
     def clickMatch(self,point):
         print(self.lines)
         for line in self.lines:
             a,b = lineToVec(line)
             if(linalg.norm(a-point) + linalg.norm(b-point) < linalg.norm(a-b)+10):
-                return line
+                for id,group in self.groups.items():
+                    if(areClose(line,group['main'])):
+                        group['main'] = line
+                        return id
+                id = getSmallest()
+                self.groups[id] = {
+                    'main': line,
+                    'other': []
+                }
+                return id
         return None
+
     def getGroups(self):
+        return self.groups
 
-        True
-
+    def getSmallest(self):
+        i= 0
+        while i in self.groups:
+            i+=1
+        return i
 
 # hlines
 # areClose(np.array([[0,0,100,0]]),np.array([[0,0,60,80]]))

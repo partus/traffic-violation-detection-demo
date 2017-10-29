@@ -24,7 +24,7 @@ class LineSelectionList(Gtk.Box):
             self.add(i)
     def add(self,id):
         row = Gtk.ListBoxRow()
-        self.list[self.getSmallest()] = row
+        self.list[id] = row
         row.add(LineTypeSelector())
         print(self.list)
         self.listbox.add(row)
