@@ -126,12 +126,13 @@ class LineStorage:
         self.lines = []
         True
     def apply(self,lines):
-        self.lines = []
+        self.lines = lines
         True
     def clickMatch(self,point):
+        print(self.lines)
         for line in self.lines:
             a,b = lineToVec(line)
-            if(linalg.norm(a-point) + linalg.norm(b-point) < linalg.norm(a-b)+3):
+            if(linalg.norm(a-point) + linalg.norm(b-point) < linalg.norm(a-b)+10):
                 return True
         return None
     def getGroups(self):

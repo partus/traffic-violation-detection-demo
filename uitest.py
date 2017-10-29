@@ -21,7 +21,7 @@ class Handler:
         global greyscale
         greyscale = ~ greyscale
     def onPixelClicked (self,box, event):
-        point = np.array([event.x, event.y],astype=np.int32)
+        point = np.array([event.x, event.y],dtype=np.int32)
         print(lineStorage.clickMatch(point))
         print(point)
 

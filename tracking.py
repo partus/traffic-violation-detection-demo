@@ -12,8 +12,11 @@ from  backgroundExtraction import BackgroundExtractor
 from functions import scaleFrame
 from denseOpticalFlow import FlowModel
 from collections import deque
+import time
+
 
 colours = np.random.rand(32,3)*255
+
 
 detect = Detector(thresh=0.4,cfg="/data/weights/cfg/yolo.cfg",weights="/data/weights/yolo.weights",metafile="/data/weights/cfg/coco.data")
 
@@ -198,14 +201,16 @@ async def main(display,lineStorage):
             display(frame)
         else:
             print("noit ok")
+        time.sleep(0.2)
         k = cv2.waitKey(30) & 0xff
 
 class Tracking:
     def __init__(self,display,lineStorage):
         self.display = display
+        self.lineStorage = lineStorage
     def __call__(self):
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(main(self.display,lineStorage))
+        loop.run_until_complete(main(self.display,self.lineStorage))
 
 
 def tracking():
