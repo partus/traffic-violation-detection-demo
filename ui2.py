@@ -13,10 +13,19 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk,Gdk
 
 class LineTypeSelector(Gtk.Box):
-    def __init__(self):
+    def __init__(self,id,cbs):
+        # self.cbs = {
+        #     'onRemove':
+        #     'onTypeChoose':
+        # }
+        self.id = id
+        self.cbs = cbs
         super(Gtk.Box, self).__init__(spacing=6)
         hbox = self
         self.hasLightBox = False
+        close = Gtk.Button.new_with_label("Click Me")
+        close.connect("clicked", self.on_close_click)
+        hbox.pack_start(close, False, False, 0)
 
         button1 = Gtk.RadioButton.new_with_label_from_widget(None, "Dividing")
         button1.connect("toggled", self.on_button_toggled, "par" )
@@ -45,6 +54,12 @@ class LineTypeSelector(Gtk.Box):
             state = "off"
         print("Button", name, "was turned", state)
 
+    def on_close_click(self,button):
+        if 'onRemove' in self.cbs:
+            self.cbs['onRemove'](self.id)
+        True
+    def remove(self):
+        self.destroy()
 class LineColorSelector(Gtk.Box):
     def get_color(self,rgb):
         colorh=rgb

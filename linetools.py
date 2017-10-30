@@ -147,6 +147,8 @@ class LineStorage:
                         return id
                 id = self.getSmallest()
                 self.groups[id] = {
+                    # type - Neitral, Parallel, Red,Green,Yello
+                    'type': 'N',
                     'main': line,
                     'other': []
                 }
@@ -155,7 +157,12 @@ class LineStorage:
 
     def getGroups(self):
         return self.groups
-
+    def setType(self,id, type):
+        self.groups[id]['type']=type
+    def remove(self,id):
+        if id in self.groups:
+            del self.groups[id]
+        True
     def getSmallest(self):
         i= 0
         while i in self.groups:
