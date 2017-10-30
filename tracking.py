@@ -197,7 +197,7 @@ async def main(display,lineStorage):
                 # draw_lines(frame,parallel, color=(255,0,255))
                 # draw_lines(frame,front, color=(0,255,0))
                 groups = lineStorage.getGroups()
-                for id,group in self.groups.items():
+                for id,group in groups.items():
                     draw_lines(frame,[group['main']], color=(255,0,0))
                     draw_lines(frame,group['other'], color=(0,0,250))
             print(framenum)

@@ -145,7 +145,7 @@ class LineStorage:
                     if(areClose(line,group['main'])):
                         group['main'] = line
                         return id
-                id = getSmallest()
+                id = self.getSmallest()
                 self.groups[id] = {
                     'main': line,
                     'other': []
