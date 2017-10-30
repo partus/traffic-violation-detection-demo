@@ -17,6 +17,9 @@ class LineTypeSelector(Gtk.Box):
         super(Gtk.Box, self).__init__(spacing=6)
         hbox = self
         self.hasLightBox = False
+        close = Gtk.Button.new_with_label("Click Me")
+        close.connect("clicked", self.on_close_click)
+        hbox.pack_start(close, False, False, 0)
 
         button1 = Gtk.RadioButton.new_with_label_from_widget(None, "Dividing")
         button1.connect("toggled", self.on_button_toggled, "par" )
@@ -44,6 +47,9 @@ class LineTypeSelector(Gtk.Box):
         else:
             state = "off"
         print("Button", name, "was turned", state)
+
+    def on_close_click(self,button):
+        True
 
 class LineColorSelector(Gtk.Box):
     def get_color(self,rgb):
