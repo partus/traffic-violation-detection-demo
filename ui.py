@@ -21,16 +21,14 @@ class LineSelectionList(Gtk.Box):
         box_outer.pack_start(listbox, True, True, 0)
 
         self.listbox = listbox
-        for i in range(2):
-            self.add(i)
     def add(self,id):
-        row = Gtk.ListBoxRow()
+        row =LineTypeSelector(id,{
+            'onRemove': self.onItemRemove,
+            'onTypeChoose': self.cbs['onTypeChoose']
+        })
         if id in self.list:
-            self.list[id].remove()
+            self.list[id].rm()
         self.list[id] = row
-        row.add(LineTypeSelector(id,{
-            'onRemove': self.onItemRemove
-        }))
         print(self.list)
         self.listbox.add(row)
     def getSmallest(self):
@@ -40,8 +38,7 @@ class LineSelectionList(Gtk.Box):
         return i
     def onItemRemove(self,id):
             self.cbs['onRemove'](id)
-            self.list[id].remove()
-        True
+            self.list[id].rm()
     def onRadioChoose(self,id,type):
         True
 

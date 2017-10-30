@@ -17,21 +17,19 @@ class Handler:
     def onDeleteWindow(self, *args):
         Gtk.main_quit(*args)
         tracking.stop()
-    def toggleGreyscale(self, *args):
-        global greyscale
-        greyscale = ~ greyscale
     def onPixelClicked (self,box, event):
         point = np.array([event.x, event.y],dtype=np.int32)
         id = lineStorage.clickMatch(point)
         if not id is None:
-            lineSelectionList.add(4)
+            lineSelectionList.add(id)
             lineSelectionList.show_all()
             print(point)
 
 window = builder.get_object("window1")
 image = builder.get_object("image")
 lineSelectionList = LineSelectionList({
-    'onRemove': lineStorage.remove
+    'onRemove': lineStorage.remove,
+    'onTypeChoose': lineStorage.onTypeChoose
 })
 builder.get_object("lineMenu").add(lineSelectionList)
 window.show_all()

@@ -111,7 +111,13 @@ def updateLines(que, flow, background):
     # background = bgExtractor.getBackground()
     allLines = getMainLines(background)
     return allLines,[],[]
-
+colorMap = {
+    # BGR color space
+    'P': (255,0,0),
+    'R': (0,0,255),
+    'Y': (0,255,255),
+    'G': (0,255,0)
+}
 async def main(display,lineStorage):
     # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
     # cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
@@ -146,7 +152,7 @@ async def main(display,lineStorage):
     allLines,parallel,front =[],[],[]
     # print(detectFuture.done())
     initiated = False
-    while framenum < 500:
+    while framenum < 3000:
         await asyncio.sleep(0.02)
         ret, frame = cap.read()
         framenum+=1
@@ -198,8 +204,9 @@ async def main(display,lineStorage):
                 # draw_lines(frame,front, color=(0,255,0))
                 groups = lineStorage.getGroups()
                 for id,group in groups.items():
-                    draw_lines(frame,[group['main']], color=(255,0,0))
-                    draw_lines(frame,group['other'], color=(0,0,250))
+                    print(group,group['type'])
+                    draw_lines(frame,[group['main']], color=colorMap[group['type']])
+                    draw_lines(frame,group['other'], color=colorMap[group['type']])
             print(framenum)
             display(frame)
         else:

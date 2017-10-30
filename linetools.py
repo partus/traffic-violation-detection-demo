@@ -121,7 +121,6 @@ def draw_lines(img, lines, extend=0, color=[255, 0, 0],extendColor=[0, 255, 0], 
             cv2.line(img, tuple(a), tuple(b), color, thickness)
         # return img
 class LineStorage:
-
     def __init__(self):
         self.lines = []
         self.groups = {}
@@ -148,7 +147,7 @@ class LineStorage:
                 id = self.getSmallest()
                 self.groups[id] = {
                     # type - Neitral, Parallel, Red,Green,Yello
-                    'type': 'N',
+                    'type': 'P',
                     'main': line,
                     'other': []
                 }
@@ -163,6 +162,8 @@ class LineStorage:
         if id in self.groups:
             del self.groups[id]
         True
+    def onTypeChoose(self,id,name):
+        self.groups[id]['type'] = name
     def getSmallest(self):
         i= 0
         while i in self.groups:
