@@ -11,7 +11,8 @@ class ListBoxRowWithData(Gtk.ListBoxRow):
         self.add(Gtk.Label(data))
 
 class LineSelectionList(Gtk.Box):
-    def __init__(self):
+    def __init__(self,cbs):
+        self.cbs = cbs
         super(Gtk.Box, self).__init__(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.list = {}
         box_outer = self
@@ -24,8 +25,12 @@ class LineSelectionList(Gtk.Box):
             self.add(i)
     def add(self,id):
         row = Gtk.ListBoxRow()
+        if id in self.list:
+            self.list[id].remove()
         self.list[id] = row
-        row.add(LineTypeSelector())
+        row.add(LineTypeSelector(id,{
+            'onRemove': self.onItemRemove
+        }))
         print(self.list)
         self.listbox.add(row)
     def getSmallest(self):
@@ -33,6 +38,12 @@ class LineSelectionList(Gtk.Box):
         while i in self.list:
             i+=1
         return i
+    def onItemRemove(self,id):
+            self.cbs['onRemove'](id)
+            self.list[id].remove()
+        True
+    def onRadioChoose(self,id,type):
+        True
 
 class ListBoxWindow(Gtk.Window):
     def __init__(self):
