@@ -68,15 +68,19 @@ def historyToTracks(hist):
     return ret
 
 def drawSortHistory(frame,history,violating=False,thickness=2):
-    print(history)
+    h = history
     color = colours[h[1]%32,:]
     trck = h[0]
-    rect = trck[-1]
-    d = rect[0].astype(np.int32)
-    cv2.rectangle(frame,(d[0],d[1]),(d[2],d[3]), color, thickness=thickness, lineType=8, shift=0)
+    if(len(trck) > 0):
+        rect = trck[-1][0]
+        d = rect[0].astype(np.int32)
+        cv2.rectangle(frame,(d[0],d[1]),(d[2],d[3]), color, thickness=thickness, lineType=8, shift=0)
+        if(violating):
+            cv2.line(frame, (d[0],d[1]),(d[2],d[3]),color, thickness=thickness, lineType=8, shift=0)
+            cv2.line(frame, (d[0],d[3]),(d[2],d[1]),color, thickness=thickness, lineType=8, shift=0)
 
-    trk = historyToTrack(history)
-    cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:],thickness=2)
+        trk = historyToTrack(history)
+        cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:],thickness=2)
 
 def drawSortHistory1(history, frame):
     for h in history:
@@ -201,7 +205,7 @@ async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-0
                 detectFuture = loop.run_in_executor(None, detect, "/tmp/todetect.jpg")
 
             if initiated:
-                drawSortDetections(trackers, frame)
+                # drawSortDetections(trackers, frame)
                 # drawSortHistory(hist, frame)
                 groups = lineStorage.getGroups()
                 for h in hist:
@@ -210,7 +214,7 @@ async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-0
 
                     for id,group in groups.items():
                         intersects = seg_poliline_intersect(group['main'],trk[0])
-                        if(len(intersects > 0)):
+                        if(len(intersects) > 0):
                             violating = True
 
                     drawSortHistory(frame,h,violating=violating)
