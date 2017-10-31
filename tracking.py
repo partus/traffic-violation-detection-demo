@@ -66,7 +66,7 @@ def historyToTracks(hist):
     for h in hist:
         trck = h[0]
         cont = []
-        for rect in trck:
+        for rect,ts in trck:
             cont.append((rect[:,0:2]+rect[:,2:4])/2)
         ret.append((np.array(cont, dtype=np.int32),h[1]))
     return ret
@@ -179,7 +179,7 @@ async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-0
                 print("result")
                 objs = detectFuture.result()
                 dets = detsYoloToSortInput(objs)
-                trackers,hist = motTracker.update(dets,True )
+                trackers,hist = motTracker.update(dets,getHistory=True )
                 tracks = historyToTracks(hist)
                 detectFuture.cancel()
                 cv2.imwrite("/tmp/todetect.jpg",frame)
