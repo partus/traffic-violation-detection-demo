@@ -139,7 +139,7 @@ class LineStorage:
         print(self.lines)
         for line in self.lines:
             a,b = lineToVec(line)
-            if(linalg.norm(a-point) + linalg.norm(b-point) < linalg.norm(a-b)+10):
+            if(linalg.norm(a-point) + linalg.norm(b-point) < linalg.norm(a-b)+1):
                 for id,group in self.groups.items():
                     if(areClose(line,group['main'])):
                         group['main'] = line

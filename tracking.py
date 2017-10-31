@@ -118,15 +118,15 @@ colorMap = {
     'Y': (0,255,255),
     'G': (0,255,0)
 }
-async def main(display,lineStorage):
+async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-08-27/3/tokyo.mp4"):
     # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
-    # cap = cv2.VideoCapture("/data/livetraffic/2017-08-27/3/tokyo.mp4")
-    cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/taiwan.mp4")
+    cap = cv2.VideoCapture(video)
+    # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/taiwan.mp4")
     # cap = cv2.VideoCapture('/data/livetraffic/2017-07-18/La Grange, KY - Virtual Railfan LIVE (La Grange, KY North)-Bv3l77cRRGY.mp4')
     # cap.set(cv2.CAP_PROP_POS_FRAMES, 80000)
     # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/Jackson Hole Wyoming Town Square - SeeJH.com-psfFJR3vZ78.mp4")
     r0,f0 = cap.read()
-    # f0 = scaleFrame(f0,factor=0.5)
+    f0 = scaleFrame(f0,factor=scaleFactor)
     cv2.imwrite("/tmp/todetect.jpg",f0)
     framenum = 0
     loop = asyncio.get_event_loop()
@@ -141,7 +141,7 @@ async def main(display,lineStorage):
         if not i % 40:
             print(i)
             r0,f0 = cap.read()
-            # f0 = scaleFrame(f0,factor=0.5)
+            f0 = scaleFrame(f0,factor=scaleFactor)
             if(r0):
                 frameque.append(f0)
                 bgExtractor.apply(f0)
@@ -157,7 +157,7 @@ async def main(display,lineStorage):
         ret, frame = cap.read()
         framenum+=1
         if ret:
-            # frame = scaleFrame(frame,factor=0.5)
+            frame = scaleFrame(frame,factor=scaleFactor)
 
             if(linesFuture.done()):
                 if(len(frameque) < 60):
@@ -189,24 +189,31 @@ async def main(display,lineStorage):
                 drawSortDetections(trackers, frame)
                 # drawSortHistory(hist, frame)
                 # pol = historyToPolylines(hist)
+                groups = lineStorage.getGroups()
                 for trk in tracks:
                     # print(trk)
-                    cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:])
+                    cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:],thickness=3)
                     # for line in allLines:
                     #     intersects = seg_poliline_intersect(line,trk[0])
                     #     for intersect in intersects:
                     #         cv2.circle(frame, tuple(intersect.astype(np.uint32)), 5, (0,0,255), thickness=3, lineType=8, shift=0)
+
+                    for id,group in groups.items():
+                        intersects = seg_poliline_intersect(group['main'],trk[0])
+                        for intersect in intersects:
+                            cv2.circle(frame, tuple(intersect.astype(np.uint32)), 5, (0,0,255), thickness=3, lineType=8, shift=0)
+
                 # cv2.polylines(frame, pol, False, (0,255,0))
                 print("parallel")
                 print(parallel)
                 draw_lines(frame,allLines, color=(255,255,0))
                 # draw_lines(frame,parallel, color=(255,0,255))
                 # draw_lines(frame,front, color=(0,255,0))
-                groups = lineStorage.getGroups()
+
                 for id,group in groups.items():
                     print(group,group['type'])
-                    draw_lines(frame,[group['main']], color=colorMap[group['type']])
-                    draw_lines(frame,group['other'], color=colorMap[group['type']])
+                    draw_lines(frame,[group['main']], color=colorMap[group['type']],thickness=3)
+                    draw_lines(frame,group['other'], color=colorMap[group['type']],thickness=3)
             print(framenum)
             display(frame)
         else:
@@ -214,12 +221,14 @@ async def main(display,lineStorage):
         cv2.waitKey(1)
 
 class Tracking:
-    def __init__(self,display,lineStorage):
+    def __init__(self,display,lineStorage,video,factor):
         self.display = display
         self.lineStorage = lineStorage
         self.loop = asyncio.get_event_loop()
+        self.video = video
+        self.factor = factor
     def __call__(self):
-        self.loop.run_until_complete(main(self.display,self.lineStorage))
+        self.loop.run_until_complete(main(self.display,self.lineStorage,scaleFactor=self.factor,video=self.video))
     def stop(self):
         self.loop.close()
 
