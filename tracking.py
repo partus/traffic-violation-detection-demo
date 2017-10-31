@@ -75,10 +75,11 @@ def historyToTracks(hist):
     return ret
 
 def drawSortHistory(frame,history,violating=False):
+    print(history)
     d = history[-1][0]
     d = d.astype(np.int32)
     cv2.rectangle(frame,(d[0],d[1]),(d[2],d[3]), colours[d[4]%32,:], thickness=2, lineType=8, shift=0)
-    
+
     trk = historyToTrack(history)
     cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:],thickness=2)
 
@@ -201,18 +202,28 @@ async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-0
                 drawSortDetections(trackers, frame)
                 # drawSortHistory(hist, frame)
                 groups = lineStorage.getGroups()
-                for trk in tracks:
-                    # print(trk)
-                    cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:],thickness=2)
-                    # for line in allLines:
-                    #     intersects = seg_poliline_intersect(line,trk[0])
-                    #     for intersect in intersects:
-                    #         cv2.circle(frame, tuple(intersect.astype(np.uint32)), 5, (0,0,255), thickness=3, lineType=8, shift=0)
+                for h in hist:
+                    violating = False
+                    trk = historyToTrack(h)
 
                     for id,group in groups.items():
                         intersects = seg_poliline_intersect(group['main'],trk[0])
-                        for intersect in intersects:
-                            cv2.circle(frame, tuple(intersect.astype(np.uint32)), 5, (0,0,255), thickness=3, lineType=8, shift=0)
+                        if(len(intersects > 0)):
+                            violating = True
+
+                    drawSortHistory(frame,h,violating=violating)
+                # for trk in tracks:
+                #     # print(trk)
+                #     cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:],thickness=2)
+                #     # for line in allLines:
+                #     #     intersects = seg_poliline_intersect(line,trk[0])
+                #     #     for intersect in intersects:
+                #     #         cv2.circle(frame, tuple(intersect.astype(np.uint32)), 5, (0,0,255), thickness=3, lineType=8, shift=0)
+                #
+                #     for id,group in groups.items():
+                #         intersects = seg_poliline_intersect(group['main'],trk[0])
+                #         for intersect in intersects:
+                #             cv2.circle(frame, tuple(intersect.astype(np.uint32)), 5, (0,0,255), thickness=3, lineType=8, shift=0)
 
                 # cv2.polylines(frame, pol, False, (0,255,0))
                 print("parallel")
