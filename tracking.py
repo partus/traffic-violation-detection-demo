@@ -192,7 +192,7 @@ async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-0
                 groups = lineStorage.getGroups()
                 for trk in tracks:
                     # print(trk)
-                    cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:],thickness=3)
+                    cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:],thickness=2)
                     # for line in allLines:
                     #     intersects = seg_poliline_intersect(line,trk[0])
                     #     for intersect in intersects:

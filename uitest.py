@@ -46,9 +46,10 @@ def show_frame(frame):
                                         frame.shape[0],
                                         frame.shape[2]*frame.shape[1])
     image.set_from_pixbuf(pb.copy())
+    image.show_all()
 
 from tracking import Tracking
-tracking = Tracking(show_frame, lineStorage,"/data/livetraffic/2017-08-27/3/tokyo.mp4",0.3)
+tracking = Tracking(show_frame, lineStorage,"/data/livetraffic/2017-08-27/3/tokyo.mp4",0.5)
 GLib.idle_add(tracking)
 # GLib.idle_add(show_frame)
 Gtk.main()
