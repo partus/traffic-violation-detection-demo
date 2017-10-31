@@ -43,7 +43,7 @@ def drawSortDetections(trackers,frame):
         d = d.astype(np.int32)
         cv2.rectangle(frame,(d[0],d[1]),(d[2],d[3]), colours[d[4]%32,:], thickness=2, lineType=8, shift=0)
 
-def drawSortHistory(history, frame):
+def drawSortHistory1(history, frame):
     for h in history:
         trck = h[0]
         color = colours[h[1]%32,:]
@@ -60,16 +60,28 @@ def historyToPolylines(hist):
             cont.append((rect[:,0:2]+rect[:,2:4])/2)
         ret.append(np.array(cont, dtype=np.int32))
     return ret
+def historyToTrack(h):
+    trck = h[0]
+    cont = []
+    for rect,ts in trck:
+        cont.append((rect[:,0:2]+rect[:,2:4])/2)
+    return (np.array(cont, dtype=np.int32),h[1])
+
 
 def historyToTracks(hist):
     ret = []
     for h in hist:
-        trck = h[0]
-        cont = []
-        for rect,ts in trck:
-            cont.append((rect[:,0:2]+rect[:,2:4])/2)
-        ret.append((np.array(cont, dtype=np.int32),h[1]))
+        ret.append(historyToTrack(h))
     return ret
+
+def drawSortHistory(frame,history,violating=False):
+    d = history[-1][0]
+    d = d.astype(np.int32)
+    cv2.rectangle(frame,(d[0],d[1]),(d[2],d[3]), colours[d[4]%32,:], thickness=2, lineType=8, shift=0)
+    
+    trk = historyToTrack(history)
+    cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:],thickness=2)
+
 
 
 # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
@@ -188,7 +200,6 @@ async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-0
             if initiated:
                 drawSortDetections(trackers, frame)
                 # drawSortHistory(hist, frame)
-                # pol = historyToPolylines(hist)
                 groups = lineStorage.getGroups()
                 for trk in tracks:
                     # print(trk)
