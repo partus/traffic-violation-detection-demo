@@ -13,7 +13,7 @@ from functions import scaleFrame
 from denseOpticalFlow import FlowModel
 from collections import deque
 import time
-
+from videoWriter import VideoWriter
 
 colours = np.random.rand(32,3)*255
 
@@ -167,13 +167,14 @@ async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-0
     allLines,parallel,front =[],[],[]
     # print(detectFuture.done())
     initiated = False
+    violationSaver = VideoWriter()
     while framenum < 3000:
         await asyncio.sleep(0.02)
         ret, frame = cap.read()
         framenum+=1
         if ret:
             frame = scaleFrame(frame,factor=scaleFactor)
-
+            violationSaver.addFrame(frame)
             if(linesFuture.done()):
                 if(len(frameque) < 60):
                     frameque.append(frame)
@@ -212,7 +213,8 @@ async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-0
                         intersects = seg_poliline_intersect(group['main'],trk[0])
                         if(len(intersects > 0)):
                             violating = True
-
+                    if(violating):
+                        violationSaver.saveViolation(h[1])
                     drawSortHistory(frame,h,violating=violating)
                 # for trk in tracks:
                 #     # print(trk)
