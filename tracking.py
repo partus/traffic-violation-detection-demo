@@ -67,9 +67,13 @@ def historyToTracks(hist):
         ret.append(historyToTrack(h))
     return ret
 
-def drawSortHistory(frame,history,violating=False,thickness=2):
+def drawSortHistory(frame,history,violating=False,thickness=2,trackthickness=1):
     h = history
     color = colours[h[1]%32,:]
+    if violating:
+        color = (0,0,255)
+    else:
+        color = (0,255,0)
     trck = h[0]
     if(len(trck) > 0):
         rect = trck[-1][0]
@@ -80,7 +84,7 @@ def drawSortHistory(frame,history,violating=False,thickness=2):
             cv2.line(frame, (d[0],d[3]),(d[2],d[1]),color, thickness=thickness, lineType=8, shift=0)
 
         trk = historyToTrack(history)
-        cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:],thickness=2)
+        cv2.polylines(frame, [trk[0]], False, color,thickness=trackthickness)
 
 def drawSortHistory1(history, frame):
     for h in history:
@@ -140,7 +144,7 @@ colorMap = {
 async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-08-27/3/tokyo.mp4"):
     # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
     cap = cv2.VideoCapture(video)
-    # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/taiwan.mp4")
+    cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/taiwan.mp4")
     # cap = cv2.VideoCapture('/data/livetraffic/2017-07-18/La Grange, KY - Virtual Railfan LIVE (La Grange, KY North)-Bv3l77cRRGY.mp4')
     # cap.set(cv2.CAP_PROP_POS_FRAMES, 80000)
     # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/Jackson Hole Wyoming Town Square - SeeJH.com-psfFJR3vZ78.mp4")
@@ -171,7 +175,7 @@ async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-0
     allLines,parallel,front =[],[],[]
     # print(detectFuture.done())
     initiated = False
-    while framenum < 3000:
+    while framenum < 300000:
         await asyncio.sleep(0.02)
         ret, frame = cap.read()
         framenum+=1
@@ -213,9 +217,10 @@ async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-0
                     trk = historyToTrack(h)
 
                     for id,group in groups.items():
-                        intersects = seg_poliline_intersect(group['main'],trk[0])
-                        if(len(intersects) > 0):
-                            violating = True
+                        if group['type'] in ['P','R']:
+                            intersects = seg_poliline_intersect(group['main'],trk[0])
+                            if(len(intersects) > 0):
+                                violating = True
 
                     drawSortHistory(frame,h,violating=violating)
                 # for trk in tracks:
