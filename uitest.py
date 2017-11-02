@@ -9,7 +9,7 @@ from ui import LineSelectionList
 import asyncio,gbulb
 gbulb.install(gtk=True)
 
-gbulb.get_event_loop()
+loop=gbulb.get_event_loop()
 
 
 
