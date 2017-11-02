@@ -6,6 +6,8 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GLib, GdkPixbuf
 from ui import LineSelectionList
 
+asyncio.set_event_loop_policy(gbulb.GtkEventLoopPolicy())
+
 cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/taiwan.mp4")
 
 builder = Gtk.Builder()
@@ -48,8 +50,10 @@ def show_frame(frame):
     image.set_from_pixbuf(pb.copy())
     image.show_all()
 
-from tracking import Tracking
-tracking = Tracking(show_frame, lineStorage,"/data/livetraffic/2017-08-27/3/tokyo.mp4",0.5)
-GLib.idle_add(tracking)
+# from tracking import Tracking
+# tracking = Tracking(show_frame, lineStorage,"/data/livetraffic/2017-08-27/3/tokyo.mp4",0.5)
+# GLib.idle_add(tracking)
 # GLib.idle_add(show_frame)
-Gtk.main()
+# Gtk.main()
+loop = asyncio.get_event_loop()
+loop.run_forever()
