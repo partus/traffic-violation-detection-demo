@@ -32,7 +32,7 @@ def junk():
     cv2.destroyAllWindows()
 
 class VideoWriter:
-    def __init__(self):
+    def __init__(self,loop=None):
         self.fourcc = fourcc = cv2.VideoWriter_fourcc(*'DIVX')
         self.toSave = {}
         frameSec = 24
@@ -41,14 +41,18 @@ class VideoWriter:
         self.frameForward = frameSec*10
         self.frameNum = 0
         self.storage = deque([],self.frameCount)
+        self.loop = loop
     def saveViolation(self,trckNum):
         if trckNum in self.saving:
             return True
         else:
             self.saving[trckNum] = self.frameNum
     def saveVideo(self,frameList,name):
-        filename = str(name)+".avi"
-        # out = cv2.VideoWriter(filename,self.fourcc, 20.0, (640,480))
+        filename = "/data/savedViolatios/"+str(name)+".avi"
+        out = cv2.VideoWriter(filename,self.fourcc, 20.0, (640,480))
+        for frame in frameList:
+            out.write(frame)
+        out.release()
     def addFrame(self,frame):
         self.frameNum+=1
         self.storage.append(frame)
@@ -56,4 +60,4 @@ class VideoWriter:
             if(value + self.frameForward >= self.frameNum):
                 frameList = list(self.storage)
                 del self.toSave[key]
-                self.saveVideo(frameList, value)
+                self.loop.run_in_executor(None,self.saveVideo,frameList, value)
