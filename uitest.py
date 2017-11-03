@@ -23,8 +23,10 @@ class Handler:
         Gtk.main_quit(*args)
         tracking.stop()
     def onPixelClicked (self,box, event):
+        print("clicked!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         point = np.array([event.x, event.y],dtype=np.int32)
         id = lineStorage.clickMatch(point)
+        print(id)
         if not id is None:
             lineSelectionList.add(id)
             lineSelectionList.show_all()

@@ -36,6 +36,7 @@ class VideoWriter:
         self.fourcc = fourcc = cv2.VideoWriter_fourcc(*'DIVX')
         self.toSave = {}
         frameSec = 24
+        self.saving = {}
         self.frameCount = frameSec*20
         self.frameForward = frameSec*10
         self.frameNum = 0

@@ -26,7 +26,7 @@ def seg_intersect(a1,a2, b1,b2) :
     # numb = dot( dbp, dp )
     # coefb = (numb / denom.astype(float))
     #
-    #
+    #id
 
     if(coef > 1 or coef < 0):
         return None
@@ -137,6 +137,7 @@ class LineStorage:
 
     def clickMatch(self,point):
         print(self.lines)
+        print("POINT",point)
         for line in self.lines:
             a,b = lineToVec(line)
             if(linalg.norm(a-point) + linalg.norm(b-point) < linalg.norm(a-b)+1):
