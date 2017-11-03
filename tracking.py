@@ -19,6 +19,25 @@ colours = np.random.rand(32,3)*255
 
 
 detect = Detector(thresh=0.4,cfg="/data/weights/cfg/yolo.cfg",weights="/data/weights/yolo.weights",metafile="/data/weights/cfg/coco.data")
+def detectAndAnalyse(groups):
+    violatingHistory = []
+    objs = detect("/tmp/todetect.jpg")
+    dets = detsYoloToSortInput(objs)
+    trackers,hist = motTracker.update(dets,getHistory=True )
+
+    for h in hist:
+        violating = False
+        trk = historyToTrack(h)
+        for id,group in groups.items():
+            if group['type'] in ['P','R']:
+                intersects = seg_poliline_intersect(group['main'],trk[0])
+                if(len(intersects) > 0):
+                    violating = True
+        violatingHistory.append((h,violating))
+        # drawSortHistory(frame,h,violating=violating)
+    return violatingHistory
+
+
 
 def drawDetection(objs,frame):
     if objs:
@@ -152,7 +171,7 @@ async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2
     f0 = scaleFrame(f0,factor=scaleFactor)
     cv2.imwrite("/tmp/todetect.jpg",f0)
     framenum = 0
-    detectFuture = loop.run_in_executor(None, detect, "/tmp/todetect.jpg")
+    detectFuture = loop.run_in_executor(None, detectAndAnalyse, lineStorage.getGroups())
     flow = FlowModel(f0)
 
     bgExtractor = BackgroundExtractor()
@@ -200,30 +219,34 @@ async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2
             if(detectFuture.done()):
                 initiated = True
                 print("result")
-                objs = detectFuture.result()
-                dets = detsYoloToSortInput(objs)
-                trackers,hist = motTracker.update(dets,getHistory=True )
-                tracks = historyToTracks(hist)
+                # objs = detectFuture.result()
+                # dets = detsYoloToSortInput(objs)
+                # trackers,hist = motTracker.update(dets,getHistory=True )
+                violatingHistory = detectFuture.result()
                 detectFuture.cancel()
                 cv2.imwrite("/tmp/todetect.jpg",frame)
-                detectFuture = loop.run_in_executor(None, detect, "/tmp/todetect.jpg")
+                detectFuture = loop.run_in_executor(None, detectAndAnalyse, lineStorage.getGroups())
 
             if initiated:
                 # drawSortDetections(trackers, frame)
                 groups = lineStorage.getGroups()
-                for h in hist:
-                    violating = False
-                    trk = historyToTrack(h)
-
-                    for id,group in groups.items():
-                        if group['type'] in ['P','R']:
-                            intersects = seg_poliline_intersect(group['main'],trk[0])
-                            if(len(intersects) > 0):
-                                violating = True
-                    if(violating):
+                for h, violating in violatingHistory:
+                    if v:
                         violationSaver.saveViolation(h[1])
-
                     drawSortHistory(frame,h,violating=violating)
+                # for h in hist:
+                #     violating = False
+                #     trk = historyToTrack(h)
+                #
+                #     for id,group in groups.items():
+                #         if group['type'] in ['P','R']:
+                #             intersects = seg_poliline_intersect(group['main'],trk[0])
+                #             if(len(intersects) > 0):
+                #                 violating = True
+                #     if(violating):
+                #         violationSaver.saveViolation(h[1])
+                #
+                #     drawSortHistory(frame,h,violating=violating)
 
                 draw_lines(frame,allLines, color=(255,255,0))
 
