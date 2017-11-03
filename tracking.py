@@ -159,10 +159,10 @@ async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2
 
 
     frameque = deque([],60)
-    for i in range(4000):
-        if not i % 40:
+    for i in range(3000):
+        r0,f0 = cap.read()
+        if not i % 30:
             print(i)
-            r0,f0 = cap.read()
             f0 = scaleFrame(f0,factor=scaleFactor)
             if(r0):
                 frameque.append(f0)
@@ -175,8 +175,8 @@ async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2
     # print(detectFuture.done())
     initiated = False
     violationSaver = VideoWriter(loop=loop)
-    while framenum < 30000:
-        await asyncio.sleep(0.05)
+    while True:
+        await asyncio.sleep(1/24)
         ret, frame = cap.read()
         framenum+=1
         if ret:
@@ -186,7 +186,7 @@ async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2
                 if(len(frameque) < 60):
                     frameque.append(frame)
                 else:
-                    print("got lines", allLines)
+                    # print("got lines", allLines)
                     allLines,parallel,front = linesFuture.result()
                     lineStorage.apply(allLines)
                     linesFuture.cancel()
@@ -210,7 +210,6 @@ async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2
 
             if initiated:
                 # drawSortDetections(trackers, frame)
-                # drawSortHistory(hist, frame)
                 groups = lineStorage.getGroups()
                 for h in hist:
                     violating = False
@@ -225,25 +224,8 @@ async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2
                         violationSaver.saveViolation(h[1])
 
                     drawSortHistory(frame,h,violating=violating)
-                # for trk in tracks:
-                #     # print(trk)
-                #     cv2.polylines(frame, [trk[0]], False, colours[trk[1]%32,:],thickness=2)
-                #     # for line in allLines:
-                #     #     intersects = seg_poliline_intersect(line,trk[0])
-                #     #     for intersect in intersects:
-                #     #         cv2.circle(frame, tuple(intersect.astype(np.uint32)), 5, (0,0,255), thickness=3, lineType=8, shift=0)
-                #
-                #     for id,group in groups.items():
-                #         intersects = seg_poliline_intersect(group['main'],trk[0])
-                #         for intersect in intersects:
-                #             cv2.circle(frame, tuple(intersect.astype(np.uint32)), 5, (0,0,255), thickness=3, lineType=8, shift=0)
 
-                # cv2.polylines(frame, pol, False, (0,255,0))
-                print("parallel")
-                print(parallel)
                 draw_lines(frame,allLines, color=(255,255,0))
-                # draw_lines(frame,parallel, color=(255,0,255))
-                # draw_lines(frame,front, color=(0,255,0))
 
                 for id,group in groups.items():
                     print(group,group['type'])
