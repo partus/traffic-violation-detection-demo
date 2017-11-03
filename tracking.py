@@ -174,7 +174,7 @@ async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2
     allLines,parallel,front =[],[],[]
     # print(detectFuture.done())
     initiated = False
-    violationSaver = VideoWriter()
+    violationSaver = VideoWriter(loop=loop)
     while framenum < 30000:
         await asyncio.sleep(0.05)
         ret, frame = cap.read()
