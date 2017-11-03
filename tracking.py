@@ -160,9 +160,11 @@ colorMap = {
     'Y': (0,255,255),
     'G': (0,255,0)
 }
-async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2017-08-27/3/tokyo.mp4"):
+async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2017-08-27/3/tokyo.mp4",frameStart= 0):
     # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
     cap = cv2.VideoCapture(video)
+    if frameStart:
+        cap.set(cv2.CAP_PROP_POS_FRAMES, frameStart)
     # cap = cv2.VideoCapture('/data/livetraffic/2017-07-18/La Grange, KY - Virtual Railfan LIVE (La Grange, KY North)-Bv3l77cRRGY.mp4')
     # cap.set(cv2.CAP_PROP_POS_FRAMES, 80000)
     # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/Jackson Hole Wyoming Town Square - SeeJH.com-psfFJR3vZ78.mp4")
@@ -264,14 +266,15 @@ async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2
         cv2.waitKey(1)
 
 class Tracking:
-    def __init__(self,loop,display,lineStorage,video,factor):
+    def __init__(self,loop,display,lineStorage,video,factor,frameStart=0):
         self.display = display
         self.lineStorage = lineStorage
         self.loop = loop
         self.video = video
         self.factor = factor
+        self.frameStart = frameStart
     async def __call__(self):
-        await main(self.display,self.lineStorage,self.loop, scaleFactor=self.factor,video=self.video)
+        await main(self.display,self.lineStorage,self.loop, scaleFactor=self.factor,video=self.video,frameStart=self.frameStart)
     def stop(self):
         self.loop.close()
 
