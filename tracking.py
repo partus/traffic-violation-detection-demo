@@ -163,7 +163,6 @@ colorMap = {
 async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2017-08-27/3/tokyo.mp4"):
     # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
     cap = cv2.VideoCapture(video)
-    cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/taiwan.mp4")
     # cap = cv2.VideoCapture('/data/livetraffic/2017-07-18/La Grange, KY - Virtual Railfan LIVE (La Grange, KY North)-Bv3l77cRRGY.mp4')
     # cap.set(cv2.CAP_PROP_POS_FRAMES, 80000)
     # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/Jackson Hole Wyoming Town Square - SeeJH.com-psfFJR3vZ78.mp4")
@@ -171,7 +170,7 @@ async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2
     f0 = scaleFrame(f0,factor=scaleFactor)
     cv2.imwrite("/tmp/todetect.jpg",f0)
     framenum = 0
-    detectFuture = loop.run_in_executor(None, detectAndAnalyse, lineStorage.getGroups())
+    detectFuture = loop.run_in_executor(None, detectAndAnalyse, lineStorage.getGroupsCopy())
     flow = FlowModel(f0)
 
     bgExtractor = BackgroundExtractor()
@@ -180,9 +179,10 @@ async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2
     frameque = deque([],60)
     for i in range(3000):
         r0,f0 = cap.read()
+        f0 = scaleFrame(f0,factor=scaleFactor)
+
         if not i % 30:
             print(i)
-            f0 = scaleFrame(f0,factor=scaleFactor)
             if(r0):
                 frameque.append(f0)
                 bgExtractor.apply(f0)
@@ -201,7 +201,9 @@ async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2
         if ret:
             frame = scaleFrame(frame,factor=scaleFactor)
             violationSaver.addFrame(frame)
+            linesFutureDone = False
             if(linesFuture.done()):
+                linesFutureDone = True
                 if(len(frameque) < 60):
                     frameque.append(frame)
                 else:
@@ -217,21 +219,22 @@ async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2
                     bgFuture = loop.run_in_executor(None, bgExtractor.apply, frame)
 
             if(detectFuture.done()):
-                initiated = True
-                print("result")
-                # objs = detectFuture.result()
-                # dets = detsYoloToSortInput(objs)
-                # trackers,hist = motTracker.update(dets,getHistory=True )
-                violatingHistory = detectFuture.result()
-                detectFuture.cancel()
-                cv2.imwrite("/tmp/todetect.jpg",frame)
-                detectFuture = loop.run_in_executor(None, detectAndAnalyse, lineStorage.getGroups())
+                if linesFutureDone:
+                    initiated = True
+                    print("result")
+                    # objs = detectFuture.result()
+                    # dets = detsYoloToSortInput(objs)
+                    # trackers,hist = motTracker.update(dets,getHistory=True )
+                    violatingHistory = detectFuture.result()
+                    detectFuture.cancel()
+                    cv2.imwrite("/tmp/todetect.jpg",frame)
+                    detectFuture = loop.run_in_executor(None, detectAndAnalyse, lineStorage.getGroupsCopy())
 
             if initiated:
                 # drawSortDetections(trackers, frame)
                 groups = lineStorage.getGroups()
                 for h, violating in violatingHistory:
-                    if v:
+                    if violating:
                         violationSaver.saveViolation(h[1])
                     drawSortHistory(frame,h,violating=violating)
                 # for h in hist:

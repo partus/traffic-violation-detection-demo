@@ -57,8 +57,8 @@ def show_frame(frame):
 
 
 from tracking import Tracking
-tracking = Tracking(loop,show_frame, lineStorage,"/data/livetraffic/2017-08-27/3/tokyo.mp4",1)
-# tracking = Tracking(show_frame, lineStorage,"/data/livetraffic/2017-07-18/taiwan.mp4",1)
+tracking = Tracking(loop,show_frame, lineStorage,"/data/livetraffic/2017-08-27/3/tokyo.mp4",0.5)
+# tracking = Tracking(loop,show_frame, lineStorage,"/data/livetraffic/2017-07-18/taiwan.mp4",1)
 # GLib.idle_add(tracking)
 # GLib.idle_add(show_frame)
 # Gtk.main()

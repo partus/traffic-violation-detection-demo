@@ -4,6 +4,7 @@ import numpy as np
 from scipy.sparse.csgraph import connected_components
 import itertools
 import cv2
+import copy
 
 def perp( a ) :
     b = empty_like(a)
@@ -155,6 +156,8 @@ class LineStorage:
                 return id
         return None
 
+    def getGroupsCopy(self):
+        return copy.deepcopy(self.groups)
     def getGroups(self):
         return self.groups
     def setType(self,id, type):
