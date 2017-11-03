@@ -141,7 +141,7 @@ colorMap = {
     'Y': (0,255,255),
     'G': (0,255,0)
 }
-async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-08-27/3/tokyo.mp4"):
+async def main(display,lineStorage,loop,scaleFactor=1,video="/data/livetraffic/2017-08-27/3/tokyo.mp4"):
     # cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/City of Auburn Toomer's Corner Webcam 2-yJAk_FozAmI.mp4")
     cap = cv2.VideoCapture(video)
     cap = cv2.VideoCapture("/data/livetraffic/2017-07-18/taiwan.mp4")
@@ -152,7 +152,6 @@ async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-0
     f0 = scaleFrame(f0,factor=scaleFactor)
     cv2.imwrite("/tmp/todetect.jpg",f0)
     framenum = 0
-    loop = asyncio.get_event_loop()
     detectFuture = loop.run_in_executor(None, detect, "/tmp/todetect.jpg")
     flow = FlowModel(f0)
 
@@ -177,7 +176,7 @@ async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-0
     initiated = False
     violationSaver = VideoWriter()
     while framenum < 30000:
-        await asyncio.sleep(0.02)
+        await asyncio.sleep(0.05)
         ret, frame = cap.read()
         framenum+=1
         if ret:
@@ -257,14 +256,14 @@ async def main(display,lineStorage,scaleFactor=1,video="/data/livetraffic/2017-0
         cv2.waitKey(1)
 
 class Tracking:
-    def __init__(self,display,lineStorage,video,factor):
+    def __init__(self,loop,display,lineStorage,video,factor):
         self.display = display
         self.lineStorage = lineStorage
-        self.loop = asyncio.get_event_loop()
+        self.loop = loop
         self.video = video
         self.factor = factor
-    def __call__(self):
-        self.loop.run_until_complete(main(self.display,self.lineStorage,scaleFactor=self.factor,video=self.video))
+    async def __call__(self):
+        await main(self.display,self.lineStorage,self.loop, scaleFactor=self.factor,video=self.video)
     def stop(self):
         self.loop.close()
 
